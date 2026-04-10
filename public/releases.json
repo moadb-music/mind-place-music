@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "name": "Silent Rebirth",
+    "type": "ALBUM",
+    "cover": "/images/releases/silent-rebirth.jpg",
+    "url": "https://open.spotify.com/intl-pt/album/0cxPVUYmdkyhaQhrKx10cB"
+  },
+  {
+    "id": "2",
+    "name": "Singularity's Echo",
+    "type": "SINGLE",
+    "cover": "/images/releases/singularitys-echo.jpg",
+    "url": "https://open.spotify.com/intl-pt/track/..."
+  }
+]
