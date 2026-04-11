@@ -156,7 +156,7 @@ export default function SomSection() {
             <p className="project-bio">
               Where late-night introspection meets rhythmic serenity. From deep chillhop textures to ambient escapes, State of Mind is your digital sanctuary for focus and calm. Immerse yourself in a twilight atmosphere designed to guide your mind through every study session and coding marathon.
             </p>
-            <Link to="/state-of-mind" className="btn-primary">EXPLORE STATE OF MIND</Link>
+            <a href="/state-of-mind#latest" className="btn-primary">EXPLORE STATE OF MIND</a>
             <div className="social-links">
               <a href="https://www.youtube.com/@SoM-Lo-Fi" target="_blank" rel="noreferrer">YouTube</a>
               <a href="https://www.instagram.com/som.lofi" target="_blank" rel="noreferrer">Instagram</a>

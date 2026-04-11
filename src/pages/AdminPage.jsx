@@ -4,6 +4,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, listAll, deleteObject } from 'firebase/storage';
 import { auth, db, storage } from '../firebase';
 import AdminLogin from './AdminLogin';
+import AnalyticsDashboard from '../components/AnalyticsDashboard';
 import './AdminPage.css';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -454,7 +455,7 @@ function SomPanel() {
 // ─── Main Admin ──────────────────────────────────────────────────────────────
 
 function AdminDashboard() {
-  const [active, setActive] = useState('som');
+  const [active, setActive] = useState('dashboard');
   const handleLogout = () => signOut(auth);
 
   return (
@@ -468,6 +469,17 @@ function AdminDashboard() {
       </nav>
       <div className="admin-body">
         <aside className="admin-sidebar">
+          <div className="admin-sidebar-label">Geral</div>
+          {[{ id: 'dashboard', label: 'Dashboard', icon: '📊' }].map(p => (
+            <div
+              key={p.id}
+              className={`admin-sidebar-item${active === p.id ? ' active' : ''}`}
+              onClick={() => setActive(p.id)}
+            >
+              <span>{p.icon}</span>
+              <span>{p.label}</span>
+            </div>
+          ))}
           <div className="admin-sidebar-label">Projetos</div>
           {[{ id: 'som', label: 'State of Mind', icon: '🎵' }].map(p => (
             <div
@@ -481,6 +493,7 @@ function AdminDashboard() {
           ))}
         </aside>
         <main className="admin-content">
+          {active === 'dashboard' && <AnalyticsDashboard />}
           {active === 'som' && <SomPanel />}
         </main>
       </div>

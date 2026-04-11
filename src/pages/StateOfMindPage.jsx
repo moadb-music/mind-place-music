@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useSomReleases } from '../hooks/useSomReleases';
 import { PlayerProvider, usePlayer } from '../context/PlayerContext';
+import { useTrackVisit } from '../hooks/useTrackVisit';
 import '../App.css';
 import './StateOfMindPage.css';
 
@@ -231,6 +232,7 @@ function StateOfMindContent() {
   const { releases, loading } = useSomReleases();
   const { playingId, setPlayingId, nowPlaying, setNowPlaying } = usePlayer();
   const ARTIST = 'State of Mind';
+  useTrackVisit('State of Mind');
 
   const latestRelease = releases[0] || null;
   const discography = releases.slice(1);
