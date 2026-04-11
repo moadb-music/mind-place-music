@@ -1,4 +1,5 @@
 import { usePlayer } from '../context/PlayerContext';
+import { Link } from 'react-router-dom';
 
 export default function Nav() {
   const { nowPlaying, setPlayingId, setNowPlaying } = usePlayer();
@@ -31,7 +32,7 @@ export default function Nav() {
 
       <div className="nav-links">
         <a href="#moadb">MOADB</a>
-        <a href="#som">STATE OF MIND</a>
+        <Link to="/state-of-mind">STATE OF MIND</Link>
       </div>
     </nav>
   );

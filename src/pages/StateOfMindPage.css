@@ -1,0 +1,483 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+/* ── State of Mind Page ─────────────────────────────────────────── */
+
+:root {
+  --som-accent: #b8a99a;
+  --som-warm: #c4a882;
+  --som-dim: #6b5f57;
+  --som-surface: rgba(20, 16, 14, 0.85);
+  --som-border: rgba(180, 160, 140, 0.12);
+}
+
+.som-page {
+  min-height: 100vh;
+  background: #0e0c0b;
+  color: #e8ddd5;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Noise overlay ──────────────────────────────────────────────── */
+.som-page .noise {
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.6;
+}
+
+/* ── Nav ────────────────────────────────────────────────────────── */
+.som-page .fixed-nav {
+  background: linear-gradient(to bottom, rgba(14,12,11,0.97), transparent);
+  border-bottom: none;
+}
+
+.som-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--som-dim);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition: color 0.3s, transform 0.3s;
+}
+
+.som-back-btn:hover {
+  color: var(--som-accent);
+  transform: translateX(-4px);
+}
+
+.som-page .nav-links a {
+  color: var(--som-dim);
+}
+
+.som-page .nav-links a:hover {
+  color: var(--som-accent);
+}
+
+.som-page .nav-links a::after {
+  background: var(--som-warm);
+}
+
+/* ── Hero / Latest ──────────────────────────────────────────────── */
+
+.som-hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 120px 48px 80px;
+}
+
+.som-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/images/stateofmind/som-bg1.png');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.18) saturate(0.6) sepia(0.3);
+  z-index: 0;
+}
+
+/* vinheta nas bordas */
+.som-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(14,12,11,0.85) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.som-hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.som-hero-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  color: var(--som-warm);
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.som-latest-card {
+  display: flex;
+  gap: 48px;
+  align-items: flex-start;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.som-latest-cover-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.som-latest-cover-col .release-links {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.som-latest-cover {
+  width: 260px;
+  height: 260px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(180,160,140,0.08);
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+  filter: saturate(0.85);
+}
+
+.som-latest-cover:hover {
+  transform: scale(1.02) translateY(-4px);
+  box-shadow: 0 48px 100px rgba(0, 0, 0, 0.9);
+}
+
+.som-latest-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+/* ícones de streaming na hero */
+.som-latest-info .release-links {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: nowrap;
+  margin: 0;
+  padding: 0;
+  justify-content: flex-start;
+}
+
+.som-latest-info .release-link-btn img {
+  width: 28px;
+  height: 28px;
+}
+
+.som-latest-title {
+  font-size: 44px;
+  font-weight: 700;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  line-height: 1.1;
+  color: #e8ddd5;
+  margin: 4px 0;
+  letter-spacing: -0.5px;
+}
+
+.som-page .release-type {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--som-warm);
+  opacity: 0.7;
+}
+
+.som-page .release-year {
+  font-size: 13px;
+  color: var(--som-dim);
+}
+
+/* player com tom quente */
+.som-page .simple-play-btn {
+  color: var(--som-dim);
+}
+.som-page .simple-play-btn:hover {
+  color: var(--som-accent);
+}
+.som-page .simple-player-fill {
+  background: var(--som-warm);
+}
+.som-page .simple-player-thumb {
+  background: var(--som-accent);
+}
+.som-page .simple-player-bar {
+  background: rgba(180,160,140,0.15);
+}
+.som-page .simple-player-time {
+  color: var(--som-dim);
+}
+.som-page .simple-player-label {
+  color: var(--som-dim);
+}
+
+/* ── Separador decorativo ───────────────────────────────────────── */
+.som-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--som-border), rgba(180,160,140,0.2), var(--som-border), transparent);
+  margin: 0;
+}
+
+/* ── About ──────────────────────────────────────────────────────── */
+
+.som-about {
+  padding: 100px 48px;
+  position: relative;
+  background: #0e0c0b;
+  overflow: hidden;
+}
+
+.som-about::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/images/stateofmind/som-bg2.png');
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
+  filter: brightness(0.12) saturate(0.5) sepia(0.4);
+  z-index: 0;
+}
+
+/* fundo sutil com textura */
+.som-about::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 100% 100% at 50% 50%, rgba(14,12,11,0.3) 0%, rgba(14,12,11,0.92) 70%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.som-about-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  gap: 64px;
+  align-items: flex-start;
+  position: relative;
+  z-index: 2;
+}
+
+.som-about-logo {
+  width: 300px;
+  height: 300px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+  filter: saturate(0.7) brightness(0.9);
+  transition: filter 0.4s ease, transform 0.4s ease;
+}
+
+.som-about-logo:hover {
+  filter: saturate(1) brightness(1);
+  transform: scale(1.03);
+}
+
+.som-about-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.som-page .project-genre {
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  color: var(--som-warm);
+  opacity: 0.7;
+}
+
+.som-page .project-name {
+  font-size: 36px;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 700;
+  background: linear-gradient(135deg, #e8ddd5 0%, #b8a99a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 24px;
+  line-height: 1.2;
+}
+
+.som-page .project-bio {
+  font-size: 16px;
+  color: var(--som-dim);
+  line-height: 1.8;
+  margin-bottom: 32px;
+  max-width: 520px;
+}
+
+.som-page .social-links a {
+  color: var(--som-dim);
+  font-size: 13px;
+}
+
+.som-page .social-links a:hover {
+  color: var(--som-accent);
+}
+
+.som-page .social-links a::before {
+  content: '→';
+}
+
+/* ── Discography ────────────────────────────────────────────────── */
+
+.som-discography {
+  padding: 100px 48px;
+  position: relative;
+  background: #0b0a09;
+  overflow: hidden;
+}
+
+.som-discography::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/images/stateofmind/som-bg3.png');
+  background-size: cover;
+  background-position: center bottom;
+  background-attachment: fixed;
+  filter: brightness(0.1) saturate(0.4) sepia(0.5);
+  z-index: 0;
+}
+
+.som-discography::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 100% 100% at 50% 50%, rgba(11,10,9,0.2) 0%, rgba(11,10,9,0.94) 65%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.som-discography-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.som-page .section-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 28px;
+  font-weight: 400;
+  color: #e8ddd5;
+  letter-spacing: 0;
+  margin-bottom: 40px;
+  text-transform: none;
+}
+
+/* cards de release com tom quente */
+.som-page .release-item-with-player {
+  background: rgba(22, 18, 15, 0.8);
+  border-color: var(--som-border);
+}
+
+.som-page .release-item-with-player:hover {
+  background: rgba(28, 22, 18, 0.95);
+  border-color: rgba(180,160,140,0.2);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+}
+
+.som-page .release-title {
+  color: #e8ddd5;
+}
+
+.som-page .release-cover-col > img {
+  filter: saturate(0.8);
+  transition: filter 0.4s ease;
+}
+
+.som-page .release-cover-col > img:hover {
+  filter: saturate(1);
+}
+
+.som-page .tracks-header {
+  color: var(--som-dim);
+}
+
+.som-page .track-name {
+  color: #b8a99a;
+}
+
+.som-page .track-item--playing .track-name {
+  color: #e8ddd5;
+}
+
+.som-page .audio-play-btn-mini {
+  color: var(--som-dim);
+}
+
+.som-page .audio-play-btn-mini:hover {
+  color: var(--som-accent);
+}
+
+/* ── Footer ─────────────────────────────────────────────────────── */
+
+.som-page .final-footer {
+  background: #0b0a09;
+  color: var(--som-dim);
+  border-top: 1px solid var(--som-border);
+}
+
+.som-page .final-footer::before {
+  background: linear-gradient(90deg, transparent, var(--som-border), transparent);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .som-hero { padding: 100px 24px 60px; }
+
+  .som-latest-card {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .som-latest-cover {
+    width: 200px;
+    height: 200px;
+  }
+
+  .som-latest-title { font-size: 32px; }
+
+  .som-about { padding: 80px 24px; }
+
+  .som-about-inner {
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .som-about-logo {
+    width: 140px;
+    height: 140px;
+  }
+
+  .som-discography { padding: 80px 24px; }
+
+  .release-item-header { grid-template-columns: 1fr; }
+
+  .release-cover-col { width: 100%; }
+
+  .release-cover-col > img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+}

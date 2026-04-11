@@ -16,9 +16,19 @@ function formatTime(sec) {
 
 function SimplePlayer({ videoId, startSec, endSec, isPlaying, onToggle, onEnd, label }) {
   const duration = (endSec - startSec) || 30;
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${startSec}&end=${endSec}`;
   const [progress, setProgress] = useState(0);
   const intervalRef = useRef(null);
+  const iframeRef = useRef(null);
+
+  // Controla o src do iframe diretamente — evita re-mount e áudio duplicado
+  useEffect(() => {
+    if (!iframeRef.current) return;
+    if (isPlaying) {
+      iframeRef.current.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${Math.floor(startSec)}&end=${Math.floor(endSec)}`;
+    } else {
+      iframeRef.current.src = '';
+    }
+  }, [isPlaying, videoId, startSec, endSec]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -34,15 +44,13 @@ function SimplePlayer({ videoId, startSec, endSec, isPlaying, onToggle, onEnd, l
       setProgress(0);
     }
     return () => clearInterval(intervalRef.current);
-  }, [isPlaying]);
+  }, [isPlaying, duration]);
 
   return (
     <div className="simple-player">
-      {isPlaying && (
-        <div style={{ overflow:'hidden', height:'1px', width:'1px', position:'absolute', pointerEvents:'none', left:'-9999px' }}>
-          <iframe width="1" height="1" src={embedUrl} title="audio" allow="autoplay" />
-        </div>
-      )}
+      <div style={{ overflow:'hidden', height:'1px', width:'1px', position:'absolute', pointerEvents:'none', left:'-9999px' }}>
+        <iframe ref={iframeRef} width="1" height="1" title="audio" allow="autoplay" />
+      </div>
       <div className="simple-player-top">
         <button className="simple-play-btn" onClick={onToggle}>
           {isPlaying ? (
@@ -107,7 +115,7 @@ export default function MoadbSection() {
     const links = [];
     if (release.links?.spotify) links.push({ icon: '/images/Spotify.png', url: release.links.spotify, name: 'Spotify' });
     if (release.links?.apple) links.push({ icon: '/images/apple.png', url: release.links.apple, name: 'Apple Music' });
-    if (release.links?.youtube) links.push({ icon: '/images/yt-music.png', url: release.links.youtube, name: 'YouTube' });
+    if (release.links?.youtube) links.push({ icon: '/images/youtube.png', url: release.links.youtube, name: 'YouTube' });
     if (release.links?.ytmusic) links.push({ icon: '/images/yt-music.png', url: release.links.ytmusic, name: 'YouTube Music' });
     if (release.links?.deezer) links.push({ icon: '/images/deezer.png', url: release.links.deezer, name: 'Deezer' });
     return links;
@@ -157,7 +165,7 @@ export default function MoadbSection() {
 
               return (
                 <div key={release.id} className="release-item-with-player">
-                  <div className="release-item-header">
+                  <div className={`release-item-header${release.type === 'SINGLE' ? ' release-item-header--single' : ''}`}>
 
                     {/* Col 1: capa + ícones */}
                     <div className="release-cover-col">
@@ -211,6 +219,15 @@ export default function MoadbSection() {
                           onEnd={() => playTrack(release.id, currentIdx + 1, tracks)}
                         />
                       )}
+
+                      <a
+                        href="https://mindofadeadbody.com.br/#discografia"
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ fontSize: 12, color: '#888', textDecoration: 'none', marginTop: 8, display: 'inline-block', letterSpacing: '0.5px' }}
+                      >
+                        Ver discografia completa →
+                      </a>
                     </div>
 
                     {/* Col 3: tracklist */}
