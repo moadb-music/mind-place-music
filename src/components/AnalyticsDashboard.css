@@ -37,6 +37,32 @@
   border-bottom-color: #c8a84b;
 }
 
+/* ── Date Input (24h) ───────────────────────────────────────────── */
+.dash-date-input {
+  margin-left: 8px;
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid rgba(200, 168, 75, 0.3);
+  border-radius: 6px;
+  color: #c8a84b;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  color-scheme: dark;
+}
+
+.dash-date-input:hover {
+  border-color: rgba(200, 168, 75, 0.6);
+  background: rgba(200, 168, 75, 0.05);
+}
+
+.dash-date-input:focus {
+  outline: none;
+  border-color: #c8a84b;
+  background: rgba(200, 168, 75, 0.08);
+}
+
 /* ── Stats Grid ─────────────────────────────────────────────────── */
 .dash-stats-grid {
   display: grid;
@@ -97,6 +123,12 @@
 .dash-chart-modes {
   display: flex;
   gap: 4px;
+}
+
+.dash-chart-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .dash-mode-btn {

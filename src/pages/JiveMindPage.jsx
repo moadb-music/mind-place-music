@@ -346,8 +346,6 @@ function JiveMindContent() {
             </p>
             <div className="social-links">
               <a href="https://www.youtube.com/@JiveMind-ElectroSwing" target="_blank" rel="noreferrer">YouTube</a>
-              <a href="https://www.instagram.com/jivemind" target="_blank" rel="noreferrer">Instagram</a>
-              <a href="https://www.tiktok.com/@jivemind" target="_blank" rel="noreferrer">TikTok</a>
             </div>
           </div>
         </div>

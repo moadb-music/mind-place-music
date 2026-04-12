@@ -14,16 +14,25 @@ const PERIODS = [
 
 const CHART_MODES = ['Linha', 'Barras'];
 
-function getStartDate(period) {
+function getStartDate(period, customDate) {
   const now = new Date();
   if (period.mode === 'today') {
-    const d = new Date(now);
-    d.setHours(0, 0, 0, 0);
-    return d;
+    // Se tem data customizada, usa ela; senão usa hoje
+    const base = customDate ? new Date(customDate + 'T00:00:00') : new Date(now);
+    base.setHours(0, 0, 0, 0);
+    return base;
   }
   const d = new Date(now);
   d.setHours(d.getHours() - period.hours);
   return d;
+}
+
+function getEndDate(period, customDate) {
+  if (period.mode === 'today' && customDate) {
+    const end = new Date(customDate + 'T23:59:59');
+    return end;
+  }
+  return new Date();
 }
 
 function groupBy(arr, keyFn) {
@@ -313,21 +322,25 @@ export default function AnalyticsDashboard() {
   const [hits, setHits] = useState([]);
   const [clicks, setClicks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [customDate, setCustomDate] = useState(''); // YYYY-MM-DD
 
   const period = PERIODS[periodIdx];
+  const todayStr = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     setLoading(true);
-    const since = Timestamp.fromDate(getStartDate(period));
+    const start = getStartDate(period, customDate);
+    const end = getEndDate(period, customDate);
+    const since = Timestamp.fromDate(start);
+    const until = Timestamp.fromDate(end);
 
-    const qPageviews = query(
-      collection(db, 'analytics'),
-      where('ts', '>=', since)
-    );
-    const qClicks = query(
-      collection(db, 'analytics_clicks'),
-      where('ts', '>=', since)
-    );
+    const qPageviews = period.mode === 'today' && customDate
+      ? query(collection(db, 'analytics'), where('ts', '>=', since), where('ts', '<=', until))
+      : query(collection(db, 'analytics'), where('ts', '>=', since));
+
+    const qClicks = period.mode === 'today' && customDate
+      ? query(collection(db, 'analytics_clicks'), where('ts', '>=', since), where('ts', '<=', until))
+      : query(collection(db, 'analytics_clicks'), where('ts', '>=', since));
 
     Promise.all([getDocs(qPageviews), getDocs(qClicks)])
       .then(([pvSnap, clSnap]) => {
@@ -340,7 +353,7 @@ export default function AnalyticsDashboard() {
         setClicks([]);
       })
       .finally(() => setLoading(false));
-  }, [periodIdx]);
+  }, [periodIdx, customDate]);
 
   const stats = useMemo(() => {
     const pageviews = hits.length;
@@ -361,17 +374,17 @@ export default function AnalyticsDashboard() {
     });
 
     const timeData = [];
-    const start = getStartDate(period);
-    const now = new Date();
+    const start = getStartDate(period, customDate);
 
     if (period.mode === 'today') {
-      const dayStart = new Date(now);
+      const dayStart = new Date(start);
       dayStart.setHours(0, 0, 0, 0);
       for (let h = 0; h <= 23; h++) {
         const key = `${dayStart.getFullYear()}-${String(dayStart.getMonth() + 1).padStart(2, '0')}-${String(dayStart.getDate()).padStart(2, '0')} ${String(h).padStart(2, '0')}:00`;
         timeData.push({ key, count: buckets[key] || 0 });
       }
     } else {
+      const now = new Date();
       for (let d = new Date(start); d <= now; d.setDate(d.getDate() + 1)) {
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         timeData.push({ key, count: buckets[key] || 0 });
@@ -385,14 +398,20 @@ export default function AnalyticsDashboard() {
     const byCountry = topN(groupBy(hits, h => h.country), 10);
     const byReferrer = topN(groupBy(hits, h => h.referrer), 10);
 
-    // Cliques de saída
     const byClick = topN(groupBy(clicks, c => c.label), 15);
     const byClickSource = topN(groupBy(clicks, c => c.source));
 
     return { pageviews, sessions, pages, countries, timeData, byPage, byDevice, byBrowser, byOS, byCountry, byReferrer, byClick, byClickSource, totalClicks: clicks.length };
-  }, [hits, clicks, period]);
+  }, [hits, clicks, period, customDate]);
 
-  const chartLabel = period.mode === 'today' ? 'PAGEVIEWS — HOJE (POR HORA)' : 'PAGEVIEWS — POR DIA';
+  const chartDateLabel = period.mode === 'today'
+    ? customDate
+      ? new Date(customDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      : 'HOJE'
+    : null;
+  const chartLabel = period.mode === 'today'
+    ? `PAGEVIEWS — ${chartDateLabel} (POR HORA)`
+    : 'PAGEVIEWS — POR DIA';
 
   return (
     <div className="dash-wrap">
@@ -401,7 +420,7 @@ export default function AnalyticsDashboard() {
           <button
             key={p.label}
             className={`dash-period-btn${periodIdx === i ? ' active' : ''}`}
-            onClick={() => setPeriodIdx(i)}
+            onClick={() => { setPeriodIdx(i); if (i !== 0) setCustomDate(''); }}
           >
             {p.label}
           </button>
@@ -422,16 +441,28 @@ export default function AnalyticsDashboard() {
           <div className="dash-chart-card">
             <div className="dash-chart-header">
               <span className="dash-chart-title">{chartLabel}</span>
-              <div className="dash-chart-modes">
-                {CHART_MODES.map(m => (
-                  <button
-                    key={m}
-                    className={`dash-mode-btn${chartMode === m ? ' active' : ''}`}
-                    onClick={() => setChartMode(m)}
-                  >
-                    {m}
-                  </button>
-                ))}
+              <div className="dash-chart-controls">
+                {period.mode === 'today' && (
+                  <input
+                    type="date"
+                    className="dash-date-input"
+                    value={customDate}
+                    max={todayStr}
+                    onChange={e => setCustomDate(e.target.value)}
+                    title="Selecionar data"
+                  />
+                )}
+                <div className="dash-chart-modes">
+                  {CHART_MODES.map(m => (
+                    <button
+                      key={m}
+                      className={`dash-mode-btn${chartMode === m ? ' active' : ''}`}
+                      onClick={() => setChartMode(m)}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
             <TimeChart data={stats.timeData} mode={chartMode} period={period} />
