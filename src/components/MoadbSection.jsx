@@ -167,10 +167,10 @@ export default function MoadbSection() {
                 <div key={release.id} className="release-item-with-player">
                   <div className={`release-item-header${release.type === 'SINGLE' ? ' release-item-header--single' : ''}`}>
 
-                    {/* Col 1: capa + ícones */}
+                    {/* Col 1: capa + ícones (desktop) */}
                     <div className="release-cover-col">
                       <img src={release.coverUrl} alt={release.title} />
-                      <div className="release-links">
+                      <div className="release-links release-links--desktop">
                         {getSocialLinks(release).map((link, idx) => (
                           <a key={idx} href={link.url} target="_blank" rel="noreferrer" className="release-link-btn" title={link.name}>
                             <img src={link.icon} alt={link.name} />
@@ -184,6 +184,13 @@ export default function MoadbSection() {
                       <span className="release-type">{release.type}</span>
                       <h4 className="release-title">{release.title}</h4>
                       <p className="release-year">{release.year}</p>
+                      <div className="release-links release-links--mobile">
+                        {getSocialLinks(release).map((link, idx) => (
+                          <a key={idx} href={link.url} target="_blank" rel="noreferrer" className="release-link-btn" title={link.name}>
+                            <img src={link.icon} alt={link.name} />
+                          </a>
+                        ))}
+                      </div>
 
                       {release.type === 'SINGLE' && release.tracks?.[0]?.youtubeUrl && (() => {
                         const track = release.tracks[0];

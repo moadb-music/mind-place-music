@@ -277,3 +277,85 @@
   color: #333;
   padding: 8px 0;
 }
+
+/* ── Three Col (última linha) ───────────────────────────────────── */
+.dash-three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.dash-three-col .dash-wide-card {
+  min-height: 260px;
+}
+
+/* ── Card header com toggle ─────────────────────────────────────── */
+.dash-card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dash-card-header-row .dash-breakdown-title {
+  margin-bottom: 0;
+}
+
+.dash-toggle {
+  display: flex;
+  gap: 2px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.dash-toggle-btn {
+  padding: 4px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #555;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+}
+
+.dash-toggle-btn:hover {
+  color: #aaa;
+}
+
+.dash-toggle-btn.active {
+  background: rgba(75, 200, 200, 0.15);
+  color: #4bc8c8;
+}
+
+.dash-breakdown-count {
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #4bc8c8;
+  letter-spacing: 0.5px;
+  text-transform: none;
+}
+
+@media (max-width: 1000px) {
+  .dash-three-col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .dash-three-col {
+    grid-template-columns: 1fr;
+  }
+  .dash-two-col {
+    grid-template-columns: 1fr;
+  }
+}

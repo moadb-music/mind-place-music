@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { collection, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import './AnalyticsDashboard.css';
 
@@ -309,7 +309,9 @@ function StatCard({ value, label }) {
 export default function AnalyticsDashboard() {
   const [periodIdx, setPeriodIdx] = useState(1);
   const [chartMode, setChartMode] = useState('Linha');
+  const [clickView, setClickView] = useState('saida');
   const [hits, setHits] = useState([]);
+  const [clicks, setClicks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const period = PERIODS[periodIdx];
@@ -317,14 +319,26 @@ export default function AnalyticsDashboard() {
   useEffect(() => {
     setLoading(true);
     const since = Timestamp.fromDate(getStartDate(period));
-    const q = query(
+
+    const qPageviews = query(
       collection(db, 'analytics'),
-      where('ts', '>=', since),
-      orderBy('ts', 'asc')
+      where('ts', '>=', since)
     );
-    getDocs(q)
-      .then(snap => setHits(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
-      .catch(() => setHits([]))
+    const qClicks = query(
+      collection(db, 'analytics_clicks'),
+      where('ts', '>=', since)
+    );
+
+    Promise.all([getDocs(qPageviews), getDocs(qClicks)])
+      .then(([pvSnap, clSnap]) => {
+        setHits(pvSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setClicks(clSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+      })
+      .catch(err => {
+        console.error('Analytics query error:', err);
+        setHits([]);
+        setClicks([]);
+      })
       .finally(() => setLoading(false));
   }, [periodIdx]);
 
@@ -371,8 +385,12 @@ export default function AnalyticsDashboard() {
     const byCountry = topN(groupBy(hits, h => h.country), 10);
     const byReferrer = topN(groupBy(hits, h => h.referrer), 10);
 
-    return { pageviews, sessions, pages, countries, timeData, byPage, byDevice, byBrowser, byOS, byCountry, byReferrer };
-  }, [hits, period]);
+    // Cliques de saída
+    const byClick = topN(groupBy(clicks, c => c.label), 15);
+    const byClickSource = topN(groupBy(clicks, c => c.source));
+
+    return { pageviews, sessions, pages, countries, timeData, byPage, byDevice, byBrowser, byOS, byCountry, byReferrer, byClick, byClickSource, totalClicks: clicks.length };
+  }, [hits, clicks, period]);
 
   const chartLabel = period.mode === 'today' ? 'PAGEVIEWS — HOJE (POR HORA)' : 'PAGEVIEWS — POR DIA';
 
@@ -426,20 +444,63 @@ export default function AnalyticsDashboard() {
             <BreakdownCard title="SISTEMA OPERACIONAL" data={stats.byOS} color="#4bc87a" />
           </div>
 
-          <div className="dash-wide-card">
-            <div className="dash-breakdown-title">PAÍSES</div>
-            {stats.byCountry.length === 0 && <p className="dash-empty-row">Sem dados</p>}
-            {stats.byCountry.map(([label, value]) => (
-              <BarRow key={label} label={label} value={value} max={stats.byCountry[0]?.[1] || 1} color="#e07c2a" />
-            ))}
-          </div>
+          {/* Última linha: Cliques | Países | Origem do Tráfego */}
+          <div className="dash-three-col">
 
-          <div className="dash-wide-card">
-            <div className="dash-breakdown-title">ORIGEM DO TRÁFEGO (REFERRER)</div>
-            {stats.byReferrer.length === 0 && <p className="dash-empty-row">Sem dados</p>}
-            {stats.byReferrer.map(([label, value]) => (
-              <BarRow key={label} label={label} value={value} max={stats.byReferrer[0]?.[1] || 1} color="#e07c2a" />
-            ))}
+            {/* Card Cliques com toggle */}
+            <div className="dash-wide-card">
+              <div className="dash-card-header-row">
+                <div className="dash-breakdown-title">
+                  CLIQUES
+                  <span className="dash-breakdown-count">{stats.totalClicks} total</span>
+                </div>
+                <div className="dash-toggle">
+                  <button
+                    className={`dash-toggle-btn${clickView === 'saida' ? ' active' : ''}`}
+                    onClick={() => setClickView('saida')}
+                  >Saída</button>
+                  <button
+                    className={`dash-toggle-btn${clickView === 'pagina' ? ' active' : ''}`}
+                    onClick={() => setClickView('pagina')}
+                  >Por Página</button>
+                </div>
+              </div>
+              {clickView === 'saida' && (
+                <>
+                  {stats.byClick.length === 0 && <p className="dash-empty-row">Sem cliques registrados ainda</p>}
+                  {stats.byClick.map(([label, value]) => (
+                    <BarRow key={label} label={label} value={value} max={stats.byClick[0]?.[1] || 1} color="#4bc8c8" />
+                  ))}
+                </>
+              )}
+              {clickView === 'pagina' && (
+                <>
+                  {stats.byClickSource.length === 0 && <p className="dash-empty-row">Sem dados</p>}
+                  {stats.byClickSource.map(([label, value]) => (
+                    <BarRow key={label} label={label} value={value} max={stats.byClickSource[0]?.[1] || 1} color="#4bc8c8" />
+                  ))}
+                </>
+              )}
+            </div>
+
+            {/* Países */}
+            <div className="dash-wide-card">
+              <div className="dash-breakdown-title">PAÍSES</div>
+              {stats.byCountry.length === 0 && <p className="dash-empty-row">Sem dados</p>}
+              {stats.byCountry.map(([label, value]) => (
+                <BarRow key={label} label={label} value={value} max={stats.byCountry[0]?.[1] || 1} color="#e07c2a" />
+              ))}
+            </div>
+
+            {/* Origem do tráfego */}
+            <div className="dash-wide-card">
+              <div className="dash-breakdown-title">ORIGEM DO TRÁFEGO</div>
+              {stats.byReferrer.length === 0 && <p className="dash-empty-row">Sem dados</p>}
+              {stats.byReferrer.map(([label, value]) => (
+                <BarRow key={label} label={label} value={value} max={stats.byReferrer[0]?.[1] || 1} color="#e07c2a" />
+              ))}
+            </div>
+
           </div>
         </>
       )}

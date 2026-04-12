@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useSomReleases } from '../hooks/useSomReleases';
 import { PlayerProvider, usePlayer } from '../context/PlayerContext';
 import { useTrackVisit } from '../hooks/useTrackVisit';
+import { useTrackExternalClicks } from '../hooks/useTrackExternalClicks';
+import { trackClick } from '../hooks/useTrackClick';
 import '../App.css';
 import './StateOfMindPage.css';
 
@@ -146,10 +148,10 @@ function ReleaseCard({ release, playingId, setPlayingId, setNowPlaying, ARTIST }
   return (
     <div className="release-item-with-player">
       <div className={`release-item-header${release.type === 'SINGLE' ? ' release-item-header--single' : ''}`}>
-        {/* Col 1: capa + ícones */}
+        {/* Col 1: capa + ícones desktop */}
         <div className="release-cover-col">
           <img src={release.coverUrl} alt={release.title} />
-          <div className="release-links">
+          <div className="release-links release-links--desktop">
             {getSocialLinks(release).map((link, idx) => (
               <a key={idx} href={link.url} target="_blank" rel="noreferrer" className="release-link-btn" title={link.name}>
                 <img src={link.icon} alt={link.name} />
@@ -163,6 +165,13 @@ function ReleaseCard({ release, playingId, setPlayingId, setNowPlaying, ARTIST }
           <span className="release-type">{release.type}</span>
           <h4 className="release-title">{release.title}</h4>
           <p className="release-year">{release.year}</p>
+          <div className="release-links release-links--mobile">
+            {getSocialLinks(release).map((link, idx) => (
+              <a key={idx} href={link.url} target="_blank" rel="noreferrer" className="release-link-btn" title={link.name}>
+                <img src={link.icon} alt={link.name} />
+              </a>
+            ))}
+          </div>
 
           {release.type === 'SINGLE' && release.tracks?.[0]?.youtubeUrl && (() => {
             const track = release.tracks[0];
@@ -233,6 +242,7 @@ function StateOfMindContent() {
   const { playingId, setPlayingId, nowPlaying, setNowPlaying } = usePlayer();
   const ARTIST = 'State of Mind';
   useTrackVisit('State of Mind');
+  useTrackExternalClicks();
 
   const latestRelease = releases[0] || null;
   const discography = releases.slice(1);
@@ -338,6 +348,7 @@ function StateOfMindContent() {
             <div className="social-links">
               <a href="https://www.youtube.com/@SoM-Lo-Fi" target="_blank" rel="noreferrer">YouTube</a>
               <a href="https://www.instagram.com/som.lofi" target="_blank" rel="noreferrer">Instagram</a>
+              <a href="https://www.tiktok.com/@state.of.mind.lofi" target="_blank" rel="noreferrer">TikTok</a>
             </div>
           </div>
         </div>

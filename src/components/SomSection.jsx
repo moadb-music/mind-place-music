@@ -160,6 +160,7 @@ export default function SomSection() {
             <div className="social-links">
               <a href="https://www.youtube.com/@SoM-Lo-Fi" target="_blank" rel="noreferrer">YouTube</a>
               <a href="https://www.instagram.com/som.lofi" target="_blank" rel="noreferrer">Instagram</a>
+              <a href="https://www.tiktok.com/@state.of.mind.lofi" target="_blank" rel="noreferrer">TikTok</a>
             </div>
           </div>
         </div>
@@ -174,10 +175,10 @@ export default function SomSection() {
               <div className="release-item-with-player">
                 <div className={`release-item-header${latest.type === 'SINGLE' ? ' release-item-header--single' : ''}`}>
 
-                  {/* Col 1: capa + ícones */}
+                  {/* Col 1: capa + ícones (desktop) */}
                   <div className="release-cover-col">
                     <img src={latest.coverUrl} alt={latest.title} />
-                    <div className="release-links">
+                    <div className="release-links release-links--desktop">
                       {getSocialLinks(latest).map((link, i) => (
                         <a key={i} href={link.url} target="_blank" rel="noreferrer" className="release-link-btn" title={link.name}>
                           <img src={link.icon} alt={link.name} />
@@ -191,6 +192,13 @@ export default function SomSection() {
                     <span className="release-type">{latest.type}</span>
                     <h4 className="release-title">{shortTitle(latest.title)}</h4>
                     <p className="release-year">{latest.year}</p>
+                    <div className="release-links release-links--mobile">
+                      {getSocialLinks(latest).map((link, i) => (
+                        <a key={i} href={link.url} target="_blank" rel="noreferrer" className="release-link-btn" title={link.name}>
+                          <img src={link.icon} alt={link.name} />
+                        </a>
+                      ))}
+                    </div>
 
                     {latest.type === 'SINGLE' && tracks[0]?.youtubeUrl && (() => {
                       const trackId = `${PREFIX}-0`;

@@ -57,21 +57,22 @@ export function useTrackVisit(pageName) {
       browser: getBrowser(ua),
       os: getOS(ua),
       referrer: getReferrer(),
-      country: 'Unknown', // enriquecido via IP se quiser no futuro
+      country: 'Unknown',
       ts: serverTimestamp(),
     };
 
-    // Tenta enriquecer com país via API pública (sem chave)
+    // Grava imediatamente sem esperar o geo
+    addDoc(collection(db, 'analytics'), data).catch(() => {});
+
+    // Tenta enriquecer país em background (falha silenciosa em localhost)
     fetch('https://ipapi.co/json/')
       .then(r => r.json())
       .then(geo => {
-        data.country = geo.country_code
-          ? `${geo.country_code} ${geo.country_name || ''}`.trim()
-          : 'Unknown';
+        if (geo.country_code) {
+          data.country = `${geo.country_code} ${geo.country_name || ''}`.trim();
+          addDoc(collection(db, 'analytics'), data).catch(() => {});
+        }
       })
-      .catch(() => {})
-      .finally(() => {
-        addDoc(collection(db, 'analytics'), data).catch(() => {});
-      });
+      .catch(() => {});
   }, [pageName]);
 }
