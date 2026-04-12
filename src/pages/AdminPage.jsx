@@ -332,7 +332,6 @@ function SomPanel() {
       .then(snap => {
         if (snap.exists()) {
           const data = snap.data();
-          // Lê como array ordenado { releases: [...] }
           const items = (data.releases || []).filter(item => item && item.title);
           setReleases(items.map((r, i) => ({ ...r, id: r.id || `release_${i}` })));
         }
@@ -344,7 +343,6 @@ function SomPanel() {
     setSaving(true);
     setFeedback('');
     try {
-      // Salva como array para preservar ordem
       await setDoc(doc(db, 'siteData', 'som_discography'), { releases: updatedReleases });
       setReleases(updatedReleases);
       setFeedback('Salvo com sucesso!');
@@ -452,6 +450,138 @@ function SomPanel() {
   );
 }
 
+// ─── JiveMind Panel ──────────────────────────────────────────────────────────
+
+function JiveMindPanel() {
+  const [releases, setReleases] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState('');
+
+  useEffect(() => {
+    getDoc(doc(db, 'siteData', 'jivemind_discography'))
+      .then(snap => {
+        if (snap.exists()) {
+          const data = snap.data();
+          const items = (data.releases || []).filter(item => item && item.title);
+          setReleases(items.map((r, i) => ({ ...r, id: r.id || `release_${i}` })));
+        }
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const persist = async (updatedReleases) => {
+    setSaving(true);
+    setFeedback('');
+    try {
+      await setDoc(doc(db, 'siteData', 'jivemind_discography'), { releases: updatedReleases });
+      setReleases(updatedReleases);
+      setFeedback('Salvo com sucesso!');
+      setTimeout(() => setFeedback(''), 3000);
+    } catch (e) {
+      setFeedback('Erro ao salvar: ' + e.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSave = (updated) => {
+    const exists = releases.find(r => r.id === updated.id);
+    const next = exists
+      ? releases.map(r => r.id === updated.id ? updated : r)
+      : [updated, ...releases];
+    setEditing(null);
+    persist(next);
+  };
+
+  const handleDelete = (id) => {
+    if (!confirm('Remover este release?')) return;
+    persist(releases.filter(r => r.id !== id));
+  };
+
+  const moveUp = (idx) => {
+    if (idx === 0) return;
+    const next = [...releases];
+    [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+    persist(next);
+  };
+
+  const moveDown = (idx) => {
+    if (idx === releases.length - 1) return;
+    const next = [...releases];
+    [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
+    persist(next);
+  };
+
+  return (
+    <div>
+      <div className="admin-section-header">
+        <div>
+          <h2 className="admin-section-title">Jive Mind</h2>
+          <p className="admin-section-sub">Discografia · o primeiro item é o "Latest Release"</p>
+        </div>
+        <button className="admin-btn-primary" onClick={() => setEditing(EMPTY_RELEASE())}>
+          + Novo Release
+        </button>
+      </div>
+
+      {feedback && (
+        <p className={feedback.startsWith('Erro') ? 'admin-error' : 'admin-success'} style={{ marginBottom: 16 }}>
+          {feedback}
+        </p>
+      )}
+
+      {loading && <p className="admin-empty">Carregando...</p>}
+      {!loading && releases.length === 0 && (
+        <p className="admin-empty">Nenhum release ainda. Adicione o primeiro!</p>
+      )}
+
+      <div className="admin-releases">
+        {releases.map((release, idx) => (
+          <div key={release.id} className="admin-release-card">
+            {release.coverUrl
+              ? <img src={release.coverUrl} alt={release.title} className="admin-release-cover" />
+              : <div className="admin-release-cover" style={{ background: '#222' }} />
+            }
+            <div className="admin-release-info">
+              <div className="admin-release-name">{release.title}</div>
+              <div className="admin-release-meta">
+                {release.type} · {release.year}
+                {idx === 0 && <span style={{ color: '#888', marginLeft: 8 }}>★ Latest</span>}
+              </div>
+            </div>
+            <div className="admin-release-actions">
+              <button className="admin-btn-icon" onClick={() => moveUp(idx)} disabled={idx === 0} title="Mover para cima">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 3l-5 6h10L8 3z" />
+                </svg>
+              </button>
+              <button className="admin-btn-icon" onClick={() => moveDown(idx)} disabled={idx === releases.length - 1} title="Mover para baixo">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 13l5-6H3l5 6z" />
+                </svg>
+              </button>
+              <button className="admin-btn-ghost" onClick={() => setEditing(release)}>Editar</button>
+              <button className="admin-btn-danger" onClick={() => handleDelete(release.id)}>Remover</button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {saving && <p className="admin-section-sub" style={{ marginTop: 12 }}>Salvando...</p>}
+
+      {editing && (
+        <ReleaseModal
+          release={editing}
+          onSave={handleSave}
+          onClose={() => setEditing(null)}
+        />
+      )}
+    </div>
+  );
+}
+
 // ─── Main Admin ──────────────────────────────────────────────────────────────
 
 function AdminDashboard() {
@@ -481,7 +611,10 @@ function AdminDashboard() {
             </div>
           ))}
           <div className="admin-sidebar-label">Projetos</div>
-          {[{ id: 'som', label: 'State of Mind', icon: '🎵' }].map(p => (
+          {[
+            { id: 'som', label: 'State of Mind', icon: '🎵' },
+            { id: 'jivemind', label: 'Jive Mind', icon: '🎷' },
+          ].map(p => (
             <div
               key={p.id}
               className={`admin-sidebar-item${active === p.id ? ' active' : ''}`}
@@ -495,6 +628,7 @@ function AdminDashboard() {
         <main className="admin-content">
           {active === 'dashboard' && <AnalyticsDashboard />}
           {active === 'som' && <SomPanel />}
+          {active === 'jivemind' && <JiveMindPanel />}
         </main>
       </div>
     </div>

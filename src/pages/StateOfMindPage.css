@@ -79,7 +79,7 @@
 .som-hero-bg {
   position: absolute;
   inset: 0;
-  background-image: url('/images/stateofmind/som-bg1.png');
+  background-image: url('/images/stateofmind/som-bg1.jpg');
   background-size: cover;
   background-position: center;
   filter: brightness(0.18) saturate(0.6) sepia(0.3);
@@ -245,7 +245,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url('/images/stateofmind/som-bg2.png');
+  background-image: url('/images/stateofmind/som-bg2.jpg');
   background-size: cover;
   background-position: center top;
   background-attachment: fixed;
@@ -349,7 +349,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url('/images/stateofmind/som-bg3.png');
+  background-image: url('/images/stateofmind/som-bg3.jpg');
   background-size: cover;
   background-position: center bottom;
   background-attachment: fixed;

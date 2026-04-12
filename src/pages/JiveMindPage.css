@@ -124,7 +124,7 @@
 .jm-hero-bg {
   position: absolute;
   inset: 0;
-  background-image: url('/images/jivemind/jm-bg1.png');
+  background-image: url('/images/jivemind/jm-bg1.jpg');
   background-size: cover;
   background-position: center;
   filter: brightness(0.22) saturate(0.5) sepia(0.6);
@@ -336,7 +336,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url('/images/jivemind/jm-bg2.png');
+  background-image: url('/images/jivemind/jm-bg2.jpg');
   background-size: cover;
   background-position: center top;
   background-attachment: fixed;
@@ -464,7 +464,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url('/images/jivemind/jm-bg3.png');
+  background-image: url('/images/jivemind/jm-bg3.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

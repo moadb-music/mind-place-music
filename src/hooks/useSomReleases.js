@@ -12,7 +12,6 @@ export function useSomReleases() {
         if (snap.exists()) {
           const data = snap.data();
           const items = (data.releases || []).filter(item => item && item.title && item.coverUrl);
-          // Normaliza tracks: Firestore às vezes salva arrays como objetos {0:{...},1:{...}}
           const normalized = items.map(r => ({
             ...r,
             tracks: Array.isArray(r.tracks)

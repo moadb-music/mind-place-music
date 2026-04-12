@@ -66,18 +66,20 @@ export function useTrackVisit(pageName) {
       ts: serverTimestamp(),
     };
 
-    // Grava imediatamente sem esperar o geo
-    addDoc(collection(db, 'analytics'), data).catch(() => {});
-
-    // Tenta enriquecer país em background (falha silenciosa em localhost)
-    fetch('https://ipapi.co/json/')
+    // Tenta pegar o país com timeout de 2s, depois grava de qualquer jeito
+    const geoTimeout = new Promise(resolve => setTimeout(resolve, 2000));
+    const geoFetch = fetch('https://ipapi.co/json/')
       .then(r => r.json())
       .then(geo => {
         if (geo.country_code) {
           data.country = `${geo.country_code} ${geo.country_name || ''}`.trim();
-          addDoc(collection(db, 'analytics'), data).catch(() => {});
         }
       })
       .catch(() => {});
+
+    Promise.race([geoFetch, geoTimeout])
+      .finally(() => {
+        addDoc(collection(db, 'analytics'), data).catch(() => {});
+      });
   }, [pageName]);
 }

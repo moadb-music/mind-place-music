@@ -77,9 +77,7 @@ export function useTrackExternalClicks() {
       };
 
       console.log('[trackClick] gravando:', label, source);
-      addDoc(collection(db, 'analytics_clicks'), data)
-        .then(() => console.log('[trackClick] gravado com sucesso'))
-        .catch(err => console.error('[trackClick] erro:', err));
+      addDoc(collection(db, 'analytics_clicks'), data).catch(() => {});
     }
 
     document.addEventListener('click', handleClick);
