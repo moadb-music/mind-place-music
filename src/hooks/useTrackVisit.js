@@ -35,6 +35,11 @@ function getSessionId() {
 }
 
 function getReferrer() {
+  // Verifica parâmetros UTM primeiro (mais confiável que o header Referer)
+  const params = new URLSearchParams(window.location.search);
+  const utmSource = params.get('utm_source');
+  if (utmSource) return utmSource;
+
   const ref = document.referrer;
   if (!ref) return 'Direct';
   try {

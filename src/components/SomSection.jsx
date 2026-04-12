@@ -235,7 +235,7 @@ export default function SomSection() {
                     )}
 
                     <Link to="/state-of-mind" style={{ fontSize: 12, color: '#888', textDecoration: 'none', marginTop: 8, display: 'inline-block', letterSpacing: '0.5px' }}>
-                      Ver discografia completa →
+                      Ver full discography →
                     </Link>
                   </div>
 

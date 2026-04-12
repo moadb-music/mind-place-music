@@ -139,7 +139,7 @@ export default function MoadbSection() {
             <p className="project-bio">
               Where visceral weight meets digital precision. From the Sci-Fi of 'Singularity's Echo' to the cosmic horror of 'Eldritch Awakening', we translate chaos into sound through millimetric layers of technique and soul.
             </p>
-            <a href="https://mindofadeadbody.com.br" target="_blank" rel="noreferrer" className="btn-primary">
+            <a href="https://mindofadeadbody.com.br" target="_blank" rel="noopener" className="btn-primary">
               VISIT WEBSITE
             </a>
             <div className="social-links">
@@ -230,10 +230,10 @@ export default function MoadbSection() {
                       <a
                         href="https://mindofadeadbody.com.br/#discografia"
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener"
                         style={{ fontSize: 12, color: '#888', textDecoration: 'none', marginTop: 8, display: 'inline-block', letterSpacing: '0.5px' }}
                       >
-                        Ver discografia completa →
+                      Ver full discography →
                       </a>
                     </div>
 
