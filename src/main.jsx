@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
 import StateOfMindPage from './pages/StateOfMindPage.jsx'
+import JiveMindPage from './pages/JiveMindPage.jsx'
 import AdminPage from './pages/AdminPage.jsx'
 
 createRoot(document.getElementById('root')).render(
@@ -12,6 +13,7 @@ createRoot(document.getElementById('root')).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/state-of-mind" element={<StateOfMindPage />} />
+        <Route path="/jive-mind" element={<JiveMindPage />} />
         <Route path="/admin" element={<AdminPage />} />
       </Routes>
     </BrowserRouter>

@@ -276,6 +276,131 @@ body {
   box-shadow: 0 12px 40px rgba(0, 10, 40, 0.6);
 }
 
+/* ── Jive Mind section (home) ───────────────────────────────────── */
+#jive-mind {
+  background-image: url('/images/jivemind/jm-main-bg.png');
+}
+
+/* Tipografia Bebas Neue para o Jive Mind */
+#jive-mind .project-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-style: normal;
+  font-size: 52px;
+  letter-spacing: 8px;
+  background: linear-gradient(135deg, #f5ead8 0%, #d4a843 60%, #f0c96a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#jive-mind .project-genre {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 5px;
+  color: #d4a843;
+  opacity: 0.85;
+}
+
+#jive-mind .section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #f5ead8;
+}
+
+#jive-mind .release-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 2px;
+  font-weight: 400;
+}
+
+/* Card com borda dourada à esquerda */
+#jive-mind .release-item-with-player {
+  background: rgba(16, 12, 4, 0.8);
+  border-color: rgba(212, 168, 67, 0.18);
+  border-left: 2px solid #d4a843;
+  border-radius: 2px;
+}
+
+#jive-mind .release-item-with-player:hover {
+  background: rgba(22, 17, 5, 0.95);
+  border-color: rgba(212, 168, 67, 0.35);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(212, 168, 67, 0.05);
+}
+
+/* Botão outline dourado */
+#jive-mind .btn-primary {
+  background: transparent;
+  color: #d4a843;
+  border: 1px solid #d4a843;
+  letter-spacing: 3px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+#jive-mind .btn-primary:hover {
+  background: #d4a843;
+  color: #0c0a06;
+  box-shadow: 0 0 20px rgba(212, 168, 67, 0.4);
+}
+
+/* Botão lo-fi — State of Mind */
+#som .btn-primary {
+  background: transparent;
+  color: #e8ddd5;
+  border: 1px solid #b8a99a;
+  border-radius: 4px;
+  letter-spacing: 2px;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 14px 32px;
+  box-shadow: none;
+  transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+#som .btn-primary::before {
+  display: none;
+}
+
+#som .btn-primary:hover {
+  background: #b8a99a;
+  color: #1a1410;
+  border-color: #b8a99a;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+#jive-mind .simple-player-fill {
+  background: linear-gradient(90deg, #d4a843, #f0c96a);
+}
+
+#jive-mind .simple-player-thumb {
+  background: #f0c96a;
+}
+
+#jive-mind .simple-player-bar {
+  background: rgba(212, 168, 67, 0.12);
+}
+
+#jive-mind .simple-play-btn:hover {
+  color: #d4a843;
+}
+
+#jive-mind .audio-play-btn-mini:hover {
+  color: #d4a843;
+}
+
+#jive-mind .track-item--playing .track-name {
+  color: #f0c96a;
+}
+
 .project-header {
   display: grid;
   grid-template-columns: 1fr 1fr;

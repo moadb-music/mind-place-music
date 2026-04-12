@@ -3,6 +3,7 @@ import Nav from './components/Nav';
 import Hero from './components/Hero';
 import MoadbSection from './components/MoadbSection';
 import SomSection from './components/SomSection';
+import JiveMindSection from './components/JiveMindSection';
 import Footer from './components/Footer';
 import { PlayerProvider } from './context/PlayerContext';
 import { useTrackVisit } from './hooks/useTrackVisit';
@@ -18,6 +19,7 @@ export default function App() {
       <Hero />
       <MoadbSection />
       <SomSection />
+      <JiveMindSection />
       <Footer />
     </PlayerProvider>
   );

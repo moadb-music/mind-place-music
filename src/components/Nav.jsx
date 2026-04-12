@@ -32,6 +32,7 @@ export default function Nav() {
       <div className="nav-links">
         <a href="#moadb">MOADB</a>
         <a href="#som">STATE OF MIND</a>
+        <a href="#jive-mind">JIVE MIND</a>
       </div>
     </nav>
   );

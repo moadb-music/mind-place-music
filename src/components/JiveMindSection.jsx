@@ -1,16 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { useSomReleases } from '../hooks/useSomReleases';
+import { useJiveMindReleases } from '../hooks/useJiveMindReleases';
 import { usePlayer } from '../context/PlayerContext';
 
-const ARTIST = 'State of Mind';
-const PREFIX = 'som-mpm';
-
-// No MPM mostra só o subtítulo após os ":"
-function shortTitle(title) {
-  const idx = title.indexOf(':');
-  return idx !== -1 ? title.slice(idx + 1).trim() : title;
-}
+const ARTIST = 'Jive Mind';
+const PREFIX = 'jm-mpm';
 
 function getVideoId(url) {
   if (!url) return '';
@@ -125,8 +119,8 @@ function getSocialLinks(release) {
   return links;
 }
 
-export default function SomSection() {
-  const { releases, loading } = useSomReleases();
+export default function JiveMindSection() {
+  const { releases, loading } = useJiveMindReleases();
   const { playingId, setPlayingId, setNowPlaying } = usePlayer();
   const latest = releases[0] || null;
 
@@ -144,23 +138,23 @@ export default function SomSection() {
   };
 
   return (
-    <section id="som" className="project-section">
+    <section id="jive-mind" className="project-section">
       <div className="project-header">
 
         {/* Col esquerda: info do artista */}
         <div>
-          <img src="/images/stateofmind/state of mind logo.png" alt="State of Mind" className="project-logo" />
+          <img src="/images/jivemind/jive mind logo.png" alt="Jive Mind" className="project-logo" />
           <div className="project-info">
-            <span className="project-genre">LO-FI / AMBIENT</span>
-            <h2 className="project-name">STATE OF MIND</h2>
+            <span className="project-genre">ELECTRO SWING</span>
+            <h2 className="project-name">JIVE MIND</h2>
             <p className="project-bio">
-              Where late-night introspection meets rhythmic serenity. From deep chillhop textures to ambient escapes, State of Mind is your digital sanctuary for focus and calm. Immerse yourself in a twilight atmosphere designed to guide your mind through every study session and coding marathon.
+              Where vintage jazz meets modern electronic beats. Jive Mind blends the golden age of swing with contemporary production, creating a sound that's both timeless and irresistibly danceable. Step into a world of brass, beats, and boundless energy.
             </p>
-            <a href="/state-of-mind#latest" className="btn-primary">EXPLORE STATE OF MIND</a>
+            <a href="/jive-mind#latest" className="btn-primary">EXPLORE JIVE MIND</a>
             <div className="social-links">
-              <a href="https://www.youtube.com/@SoM-Lo-Fi" target="_blank" rel="noreferrer">YouTube</a>
-              <a href="https://www.instagram.com/som.lofi" target="_blank" rel="noreferrer">Instagram</a>
-              <a href="https://www.tiktok.com/@state.of.mind.lofi" target="_blank" rel="noreferrer">TikTok</a>
+              <a href="https://www.youtube.com/@JiveMind-ElectroSwing" target="_blank" rel="noreferrer">YouTube</a>
+              <a href="https://www.instagram.com/jivemind" target="_blank" rel="noreferrer">Instagram</a>
+              <a href="https://www.tiktok.com/@jivemind" target="_blank" rel="noreferrer">TikTok</a>
             </div>
           </div>
         </div>
@@ -190,7 +184,7 @@ export default function SomSection() {
                   {/* Col 2: info + player */}
                   <div className="release-details">
                     <span className="release-type">{latest.type}</span>
-                    <h4 className="release-title">{shortTitle(latest.title)}</h4>
+                    <h4 className="release-title">{latest.title}</h4>
                     <p className="release-year">{latest.year}</p>
                     <div className="release-links release-links--mobile">
                       {getSocialLinks(latest).map((link, i) => (
@@ -210,7 +204,7 @@ export default function SomSection() {
                           startSec={Math.floor(tracks[0].startSec || 0)}
                           endSec={Math.floor(tracks[0].endSec || 0)}
                           isPlaying={isPlaying}
-                          label={shortTitle(latest.title)}
+                          label={latest.title}
                           onToggle={() => {
                             if (isPlaying) { setPlayingId(null); setNowPlaying(null); }
                             else { setPlayingId(trackId); setNowPlaying({ title: latest.title, artist: ARTIST }); }
@@ -234,12 +228,12 @@ export default function SomSection() {
                       />
                     )}
 
-                    <Link to="/state-of-mind" style={{ fontSize: 12, color: '#888', textDecoration: 'none', marginTop: 8, display: 'inline-block', letterSpacing: '0.5px' }}>
+                    <Link to="/jive-mind" style={{ fontSize: 12, color: '#888', textDecoration: 'none', marginTop: 8, display: 'inline-block', letterSpacing: '0.5px' }}>
                       Full discography →
                     </Link>
                   </div>
 
-                  {/* Col 3: tracklist — só para album/EP, igual ao MOADB */}
+                  {/* Col 3: tracklist — só para album/EP */}
                   {latest.type !== 'SINGLE' && tracks.length > 0 && (
                     <div className="tracks-list-right">
                       <div className="tracks-header">Tracks</div>
