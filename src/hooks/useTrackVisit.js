@@ -52,6 +52,11 @@ function getReferrer() {
 
 export function useTrackVisit(pageName) {
   useEffect(() => {
+    // Não contabiliza em desenvolvimento local
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
+    // Não contabiliza visitas do admin
+    if (localStorage.getItem('mpm_admin')) return;
+
     const ua = navigator.userAgent;
     const sessionId = getSessionId();
 

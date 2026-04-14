@@ -1,9 +1,14 @@
 import { useSpotifyReleases } from '../hooks/useSpotifyReleases';
 import { usePlayer } from '../context/PlayerContext';
 import ReleaseCard from './ReleaseCard';
+import MobileCarousel from './MobileCarousel';
+import { useIsMobile } from '../hooks/useIsMobile';
+import { useLang } from '../context/LangContext';
 
 export default function MoadbSection() {
   const { releases, loading } = useSpotifyReleases();
+  const isMobile = useIsMobile();
+  const { t } = useLang();
   const ARTIST = 'Mind of a Dead Body';
 
   return (
@@ -12,13 +17,11 @@ export default function MoadbSection() {
         <div>
           <img src="/images/Mind of a Dead Body.png" alt="MOADB" className="project-logo" />
           <div className="project-info">
-            <span className="project-genre">MODERN METALCORE</span>
+            <span className="project-genre">{t.moadb.genre}</span>
             <h2 className="project-name">MIND OF A DEAD BODY</h2>
-            <p className="project-bio">
-              Where visceral weight meets digital precision. From the Sci-Fi of 'Singularity's Echo' to the cosmic horror of 'Eldritch Awakening', we translate chaos into sound through millimetric layers of technique and soul.
-            </p>
+            <p className="project-bio">{t.moadb.bio}</p>
             <a href="https://mindofadeadbody.com.br" target="_blank" rel="noopener" className="btn-primary">
-              VISIT WEBSITE
+              {t.moadb.visitWebsite}
             </a>
             <div className="social-links">
               <a href="https://www.instagram.com/mindofadeadbody" target="_blank" rel="noreferrer">Instagram</a>
@@ -30,29 +33,38 @@ export default function MoadbSection() {
 
         <div className="releases-section">
           <div className="releases-section-header">
-            <h3 className="section-title">Latest Releases</h3>
-            <a
-              href="https://mindofadeadbody.com.br/#discografia"
-              target="_blank"
-              rel="noopener"
-              className="view-all-link"
-            >
-              Full discography →
+            <h3 className="section-title">{t.common.latestReleases}</h3>
+            <a href="https://mindofadeadbody.com.br/#discografia" target="_blank" rel="noopener" className="view-all-link">
+              {t.common.fullDiscography}
             </a>
           </div>
-          {loading && <p className="loading-text">Loading...</p>}
+          {loading && <p className="loading-text">{t.common.loading}</p>}
           {!loading && (
-            <div className="releases-list">
-              {releases.slice(0, 4).map(release => (
-                <ReleaseCard
-                  key={release.id}
-                  release={release}
-                  trackId={`moadb-${release.id}`}
-                  artist={ARTIST}
-                  project="moadb"
-                />
-              ))}
-            </div>
+            isMobile ? (
+              <MobileCarousel>
+                {releases.slice(0, 4).map(release => (
+                  <ReleaseCard
+                    key={release.id}
+                    release={release}
+                    trackId={`moadb-${release.id}`}
+                    artist={ARTIST}
+                    project="moadb"
+                  />
+                ))}
+              </MobileCarousel>
+            ) : (
+              <div className="releases-list">
+                {releases.slice(0, 4).map(release => (
+                  <ReleaseCard
+                    key={release.id}
+                    release={release}
+                    trackId={`moadb-${release.id}`}
+                    artist={ARTIST}
+                    project="moadb"
+                  />
+                ))}
+              </div>
+            )
           )}
         </div>
       </div>

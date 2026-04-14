@@ -1,30 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { usePlayer } from '../context/PlayerContext';
+import { isInAppBrowser } from '../utils/browserDetect';
+import { loadYTApi } from '../utils/ytApi';
+
+const IN_APP = isInAppBrowser();
 
 function getVideoId(url) {
   if (!url) return '';
   if (url.includes('v=')) return url.split('v=')[1].split('&')[0];
   if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split('?')[0];
   return '';
-}
-
-let ytApiReady = false;
-let ytApiCallbacks = [];
-function loadYTApi() {
-  if (ytApiReady) return Promise.resolve();
-  return new Promise(resolve => {
-    ytApiCallbacks.push(resolve);
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      document.head.appendChild(tag);
-      window.onYouTubeIframeAPIReady = () => {
-        ytApiReady = true;
-        ytApiCallbacks.forEach(cb => cb());
-        ytApiCallbacks = [];
-      };
-    }
-  });
 }
 
 function getSocialLinks(release) {
@@ -133,7 +118,7 @@ function TrackPlayer({ trackId, track, artist, index }) {
   return (
     <div
       className={`rc-track-item${isPlaying ? ' rc-track-item--playing' : ''}`}
-      onClick={handlePlay}
+      onClick={IN_APP ? undefined : handlePlay}
       style={{ cursor: videoId ? 'pointer' : 'default' }}
     >
       <span className="rc-track-index">{String(index + 1).padStart(2, '0')}</span>
@@ -147,18 +132,33 @@ function TrackPlayer({ trackId, track, artist, index }) {
         )}
       </div>
 
-      <button className="rc-track-play-btn" tabIndex={-1} disabled={!videoId}>
-        {isActivelyPlaying ? (
-          <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
-            <rect x="4" y="3" width="3" height="10" />
-            <rect x="9" y="3" width="3" height="10" />
-          </svg>
-        ) : (
+      {IN_APP && videoId ? (
+        <a
+          href={track.youtubeUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="rc-track-play-btn rc-inapp-link"
+          onClick={e => e.stopPropagation()}
+          title="Abrir no YouTube"
+        >
           <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
             <path d="M5 3l8 5-8 5V3z" />
           </svg>
-        )}
-      </button>
+        </a>
+      ) : (
+        <button className="rc-track-play-btn" tabIndex={-1} disabled={!videoId}>
+          {isActivelyPlaying ? (
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
+              <rect x="4" y="3" width="3" height="10" />
+              <rect x="9" y="3" width="3" height="10" />
+            </svg>
+          ) : (
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M5 3l8 5-8 5V3z" />
+            </svg>
+          )}
+        </button>
+      )}
 
       <div style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden', pointerEvents: 'none' }}>
         <div ref={containerRef} />
@@ -306,21 +306,36 @@ export default function ReleaseCard({ release, trackId, artist, project = '' }) 
             <span className="release-card-type-badge">{release.type}</span>
 
             {videoId && (
-              <button
-                className={`release-card-play-btn${isActivelyPlaying ? ' playing' : ''}`}
-                onClick={handlePlay}
-              >
-                {isActivelyPlaying ? (
-                  <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor">
-                    <rect x="4" y="3" width="3" height="10" />
-                    <rect x="9" y="3" width="3" height="10" />
-                  </svg>
-                ) : (
+              IN_APP ? (
+                <a
+                  href={firstTrack?.youtubeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="release-card-play-btn rc-inapp-link"
+                  onClick={e => e.stopPropagation()}
+                  title="Abrir no YouTube"
+                >
                   <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor">
                     <path d="M5 3l8 5-8 5V3z" />
                   </svg>
-                )}
-              </button>
+                </a>
+              ) : (
+                <button
+                  className={`release-card-play-btn${isActivelyPlaying ? ' playing' : ''}`}
+                  onClick={handlePlay}
+                >
+                  {isActivelyPlaying ? (
+                    <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor">
+                      <rect x="4" y="3" width="3" height="10" />
+                      <rect x="9" y="3" width="3" height="10" />
+                    </svg>
+                  ) : (
+                    <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M5 3l8 5-8 5V3z" />
+                    </svg>
+                  )}
+                </button>
+              )
             )}
 
             {/* Botão flip — só para álbuns */}

@@ -8,26 +8,31 @@ import JiveMindSection from './components/JiveMindSection';
 import Footer from './components/Footer';
 import SectionDivider from './components/SectionDivider';
 import { PlayerProvider } from './context/PlayerContext';
+import { LangProvider } from './context/LangContext';
 import { useTrackVisit } from './hooks/useTrackVisit';
 import { useTrackExternalClicks } from './hooks/useTrackExternalClicks';
+import InAppBrowserBanner from './components/InAppBrowserBanner';
 
 export default function App() {
   useTrackVisit('Home');
   useTrackExternalClicks();
   return (
-    <PlayerProvider>
-      <div className="noise"></div>
-      <Nav />
-      <Hero />
-      <SectionDivider />
-      <LatestReleasesSection />
-      <SectionDivider />
-      <MoadbSection />
-      <SectionDivider />
-      <SomSection />
-      <SectionDivider />
-      <JiveMindSection />
-      <Footer />
-    </PlayerProvider>
+    <LangProvider>
+      <PlayerProvider>
+        <div className="noise"></div>
+        <InAppBrowserBanner />
+        <Nav />
+        <Hero />
+        <SectionDivider />
+        <LatestReleasesSection />
+        <SectionDivider />
+        <MoadbSection />
+        <SectionDivider />
+        <SomSection />
+        <SectionDivider />
+        <JiveMindSection />
+        <Footer />
+      </PlayerProvider>
+    </LangProvider>
   );
 }

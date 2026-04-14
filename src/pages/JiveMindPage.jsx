@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useJiveMindReleases } from '../hooks/useJiveMindReleases';
 import { PlayerProvider, usePlayer } from '../context/PlayerContext';
+import { LangProvider } from '../context/LangContext';
 import { useTrackVisit } from '../hooks/useTrackVisit';
 import { useTrackExternalClicks } from '../hooks/useTrackExternalClicks';
 import SimplePlayer from '../components/SimplePlayer';
 import ReleaseCard from '../components/ReleaseCard';
+import LangSwitcher from '../components/LangSwitcher';
 import '../App.css';
 import './JiveMindPage.css';
 
@@ -121,6 +123,7 @@ function JiveMindContent() {
           <a href="#about">ABOUT</a>
           <a href="#discography">DISCOGRAPHY</a>
         </div>
+        <LangSwitcher />
       </nav>
 
       {/* ── Hero / Latest Release ── */}
@@ -132,7 +135,27 @@ function JiveMindContent() {
           {!loading && latestRelease && (
             <div className="jm-latest-card">
               <div className="jm-latest-cover-col">
-                <img src={latestRelease.coverUrl} alt={latestRelease.title} className="jm-latest-cover" />
+                {latestRelease.tracks?.[0]?.youtubeUrl && (() => {
+                  const track = latestRelease.tracks[0];
+                  const trackId = `latest-${latestRelease.id}-0`;
+                  const isPlaying = playingId === trackId;
+                  const toggle = () => {
+                    if (isPlaying) { setPlayingId(null); setNowPlaying(null); }
+                    else { setPlayingId(trackId); setNowPlaying({ title: latestRelease.title, artist: ARTIST }); }
+                  };
+                  return (
+                    <div className={`jm-cover-clickable${isPlaying ? ' jm-cover-clickable--playing' : ''}`} onClick={toggle}>
+                      <img src={latestRelease.coverUrl} alt={latestRelease.title} className="jm-latest-cover" />
+                      <div className="jm-cover-play-overlay">
+                        {isPlaying ? (
+                          <svg width="32" height="32" viewBox="0 0 16 16" fill="currentColor"><rect x="4" y="3" width="3" height="10"/><rect x="9" y="3" width="3" height="10"/></svg>
+                        ) : (
+                          <svg width="32" height="32" viewBox="0 0 16 16" fill="currentColor"><path d="M5 3l8 5-8 5V3z"/></svg>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })() || <img src={latestRelease.coverUrl} alt={latestRelease.title} className="jm-latest-cover" />}
                 <div className="release-links" style={{ justifyContent: 'center', marginTop: 12 }}>
                   {getSocialLinks(latestRelease).map((link, idx) => (
                     <a key={idx} href={link.url} target="_blank" rel="noreferrer" className="release-link-btn" title={link.name}>
@@ -225,8 +248,10 @@ function JiveMindContent() {
 
 export default function JiveMindPage() {
   return (
-    <PlayerProvider>
-      <JiveMindContent />
-    </PlayerProvider>
+    <LangProvider>
+      <PlayerProvider>
+        <JiveMindContent />
+      </PlayerProvider>
+    </LangProvider>
   );
 }

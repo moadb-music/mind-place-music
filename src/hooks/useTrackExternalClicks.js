@@ -56,6 +56,10 @@ function getSection(el) {
 export function useTrackExternalClicks() {
   useEffect(() => {
     function handleClick(e) {
+      // Não rastreia admin nem localhost
+      if (localStorage.getItem('mpm_admin')) return;
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
+
       // Botão do meio (auxclick) ou botão esquerdo (click)
       if (e.type === 'auxclick' && e.button !== 1) return;
 

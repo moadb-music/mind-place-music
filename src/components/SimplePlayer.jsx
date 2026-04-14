@@ -1,30 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { usePlayer } from '../context/PlayerContext';
+import { loadYTApi } from '../utils/ytApi';
 
 function formatTime(sec) {
   const s = Math.floor(sec);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-}
-
-// Carrega o script da YouTube IFrame API uma única vez
-let ytApiReady = false;
-let ytApiCallbacks = [];
-
-function loadYTApi() {
-  if (ytApiReady) return Promise.resolve();
-  return new Promise(resolve => {
-    ytApiCallbacks.push(resolve);
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      document.head.appendChild(tag);
-      window.onYouTubeIframeAPIReady = () => {
-        ytApiReady = true;
-        ytApiCallbacks.forEach(cb => cb());
-        ytApiCallbacks = [];
-      };
-    }
-  });
 }
 
 export default function SimplePlayer({ videoId, startSec, endSec, isPlaying, onToggle, onEnd, label }) {
@@ -33,10 +13,9 @@ export default function SimplePlayer({ videoId, startSec, endSec, isPlaying, onT
   const [progress, setProgress] = useState(0);
   const intervalRef = useRef(null);
   const containerRef = useRef(null);
-  const playerRef = useRef(null); // YT.Player instance
+  const playerRef = useRef(null);
   const { setProgress: setGlobalProgress, setIsPaused, isPaused: globalPaused } = usePlayer();
 
-  // Sincroniza pausa local com o botão do nav
   useEffect(() => {
     if (!isPlaying) return;
     if (globalPaused && !paused) {
@@ -50,7 +29,6 @@ export default function SimplePlayer({ videoId, startSec, endSec, isPlaying, onT
     }
   }, [globalPaused]);
 
-  // Reset quando outro player assume
   useEffect(() => {
     if (!isPlaying) {
       setPaused(false);
@@ -58,44 +36,22 @@ export default function SimplePlayer({ videoId, startSec, endSec, isPlaying, onT
       setProgress(0);
       setGlobalProgress(0);
       clearInterval(intervalRef.current);
-      playerRef.current?.stopVideo?.();
+      try { playerRef.current?.destroy(); } catch {}
+      playerRef.current = null;
     }
   }, [isPlaying]);
 
-  // Inicializa/destrói o YT.Player quando começa a tocar
   useEffect(() => {
     if (!isPlaying) return;
-
     loadYTApi().then(() => {
       if (!containerRef.current) return;
-
-      // Destrói player anterior se existir
-      if (playerRef.current) {
-        try { playerRef.current.destroy(); } catch {}
-        playerRef.current = null;
-      }
-
+      try { playerRef.current?.destroy(); } catch {}
       playerRef.current = new window.YT.Player(containerRef.current, {
-        width: '1',
-        height: '1',
-        videoId,
-        playerVars: {
-          autoplay: 1,
-          start: Math.floor(startSec),
-          end: Math.floor(endSec),
-          controls: 0,
-          disablekb: 1,
-          fs: 0,
-          modestbranding: 1,
-          rel: 0,
-        },
+        width: '1', height: '1', videoId,
+        playerVars: { autoplay: 1, start: Math.floor(startSec), end: Math.floor(endSec), controls: 0, disablekb: 1, fs: 0, modestbranding: 1, rel: 0 },
         events: {
-          onReady: (e) => {
-            e.target.playVideo();
-            startInterval();
-          },
+          onReady: (e) => { e.target.playVideo(); startInterval(); },
           onStateChange: (e) => {
-            // YT.PlayerState.ENDED = 0
             if (e.data === 0) {
               clearInterval(intervalRef.current);
               setProgress(0);
@@ -106,10 +62,7 @@ export default function SimplePlayer({ videoId, startSec, endSec, isPlaying, onT
         },
       });
     });
-
-    return () => {
-      clearInterval(intervalRef.current);
-    };
+    return () => clearInterval(intervalRef.current);
   }, [isPlaying, videoId, startSec, endSec]);
 
   function startInterval() {
@@ -117,10 +70,7 @@ export default function SimplePlayer({ videoId, startSec, endSec, isPlaying, onT
     intervalRef.current = setInterval(() => {
       setProgress(p => {
         const next = p + (100 / (duration * 10));
-        if (next >= 100) {
-          clearInterval(intervalRef.current);
-          return 100;
-        }
+        if (next >= 100) { clearInterval(intervalRef.current); return 100; }
         setGlobalProgress(next);
         return next;
       });
@@ -129,17 +79,14 @@ export default function SimplePlayer({ videoId, startSec, endSec, isPlaying, onT
 
   const handleClick = () => {
     if (!isPlaying) {
-      // Inicia
       setPaused(false);
       onToggle();
     } else if (paused) {
-      // Retoma
       setPaused(false);
       setIsPaused(false);
       playerRef.current?.playVideo?.();
       startInterval();
     } else {
-      // Pausa
       setPaused(true);
       setIsPaused(true);
       playerRef.current?.pauseVideo?.();
@@ -151,13 +98,12 @@ export default function SimplePlayer({ videoId, startSec, endSec, isPlaying, onT
 
   return (
     <div className="simple-player">
-      {/* Container do YT.Player — invisível */}
       <div style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden', pointerEvents: 'none' }}>
         <div ref={containerRef} />
       </div>
 
-      <div className="simple-player-top">
-        <button className="simple-play-btn" onClick={handleClick}>
+      <div className="simple-player-top" onClick={handleClick} style={{ cursor: 'pointer' }}>
+        <button className="simple-play-btn" tabIndex={-1}>
           {isActivelyPlaying ? (
             <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor">
               <rect x="4" y="3" width="3" height="10" />

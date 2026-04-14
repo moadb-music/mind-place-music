@@ -605,3 +605,41 @@
     margin-bottom: 28px;
   }
 }
+
+/* Cover clicável no hero */
+.som-cover-clickable {
+  position: relative;
+  cursor: pointer;
+  display: block;
+}
+
+.som-cover-clickable img {
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.som-cover-clickable:hover img,
+.som-cover-clickable--playing img {
+  filter: brightness(0.5);
+  transform: scale(1.03);
+}
+
+.som-cover-play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.som-cover-clickable:hover .som-cover-play-overlay,
+.som-cover-clickable--playing .som-cover-play-overlay {
+  opacity: 1;
+}
+
+.som-cover-play-overlay svg {
+  filter: drop-shadow(0 2px 12px rgba(0,0,0,0.8));
+}

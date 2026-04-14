@@ -728,7 +728,12 @@ export default function AdminPage() {
   const [user, setUser] = useState(undefined);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, u => setUser(u));
+    const unsub = onAuthStateChanged(auth, u => {
+      setUser(u);
+      // Flag para não contabilizar visitas do admin
+      if (u) localStorage.setItem('mpm_admin', '1');
+      else localStorage.removeItem('mpm_admin');
+    });
     return unsub;
   }, []);
 

@@ -1,8 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSomReleases } from '../hooks/useSomReleases';
 import { useJiveMindReleases } from '../hooks/useJiveMindReleases';
 import { useSpotifyReleases } from '../hooks/useSpotifyReleases';
 import { usePlayer } from '../context/PlayerContext';
+import { isInAppBrowser } from '../utils/browserDetect';
+import { loadYTApi } from '../utils/ytApi';
+import { useLang } from '../context/LangContext';
+
+const IN_APP = isInAppBrowser();
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -17,26 +22,6 @@ function formatDate(dateStr) {
   if (!dateStr) return '';
   const [y, m, d] = dateStr.split('-');
   return `${d}/${m}/${y}`;
-}
-
-// YT API loader (igual ao SimplePlayer)
-let ytApiReady = false;
-let ytApiCallbacks = [];
-function loadYTApi() {
-  if (ytApiReady) return Promise.resolve();
-  return new Promise(resolve => {
-    ytApiCallbacks.push(resolve);
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      document.head.appendChild(tag);
-      window.onYouTubeIframeAPIReady = () => {
-        ytApiReady = true;
-        ytApiCallbacks.forEach(cb => cb());
-        ytApiCallbacks = [];
-      };
-    }
-  });
 }
 
 // ─── Extração de itens ───────────────────────────────────────────────────────
@@ -68,6 +53,7 @@ function extractItems(releases, artist, project) {
         id: `${project}-track-${release.id}-${idx}`,
         trackId: `lr-${project}-track-${release.id}-${idx}`,
         releaseDate: track.releaseDate,
+        trackIndex: idx,
         title: track.title || track.name || '',
         typeLabel: 'TRACK',
         coverUrl: release.coverUrl,
@@ -190,18 +176,33 @@ function ReleaseCard({ item, playingId, setPlayingId, setNowPlaying, onActiveCha
 
         {/* Botão play/pause na capa */}
         {videoId && (
-          <button className={`lr-cover-play${isPlaying ? ' playing' : ''}`} onClick={handlePlay}>
-            {isActivelyPlaying ? (
-              <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor">
-                <rect x="4" y="3" width="3" height="10" />
-                <rect x="9" y="3" width="3" height="10" />
-              </svg>
-            ) : (
+          IN_APP ? (
+            <a
+              href={item.youtubeUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="lr-cover-play playing rc-inapp-link"
+              onClick={e => e.stopPropagation()}
+              title="Abrir no YouTube"
+            >
               <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor">
                 <path d="M5 3l8 5-8 5V3z" />
               </svg>
-            )}
-          </button>
+            </a>
+          ) : (
+            <button className={`lr-cover-play${isPlaying ? ' playing' : ''}`} onClick={handlePlay}>
+              {isActivelyPlaying ? (
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor">
+                  <rect x="4" y="3" width="3" height="10" />
+                  <rect x="9" y="3" width="3" height="10" />
+                </svg>
+              ) : (
+                <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M5 3l8 5-8 5V3z" />
+                </svg>
+              )}
+            </button>
+          )
         )}
 
         {/* Timeline no rodapé da capa */}
@@ -220,7 +221,12 @@ function ReleaseCard({ item, playingId, setPlayingId, setNowPlaying, onActiveCha
       <div className="lr-card-bottom">
         <div className="lr-info">
           <span className="lr-artist">{item.artist}</span>
-          <span className="lr-track-title">{item.title}</span>
+          <span className="lr-track-title">
+            {item.kind === 'track' && item.trackIndex != null && (
+              <span className="lr-track-number">#{item.trackIndex + 1} </span>
+            )}
+            {item.title}
+          </span>
           <span className="lr-release-context">{item.subtitle || ''}</span>
           <span className="lr-date">{formatDate(item.releaseDate)}</span>
         </div>
@@ -236,7 +242,10 @@ export default function LatestReleasesSection() {
   const { releases: jmReleases, loading: jmLoading } = useJiveMindReleases();
   const { releases: moadbReleases, loading: moadbLoading } = useSpotifyReleases();
   const { playingId, setPlayingId, setNowPlaying } = usePlayer();
+  const { t } = useLang();
   const [activeId, setActiveId] = useState(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const carouselRef = useRef(null);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' && window.innerWidth <= 768
   );
@@ -259,13 +268,14 @@ export default function LatestReleasesSection() {
     ...extractItems(jmReleases, 'Jive Mind', 'jm'),
   ];
 
-  const sorted = [...allItems].sort((a, b) =>
-    b.releaseDate > a.releaseDate ? 1 : b.releaseDate < a.releaseDate ? -1 : 0
-  );
+  const sorted = [...allItems].sort((a, b) => {
+    if (b.releaseDate > a.releaseDate) return 1;
+    if (b.releaseDate < a.releaseDate) return -1;
+    // mesma data — ordena por trackIndex (número maior = mais recente = primeiro)
+    return (b.trackIndex ?? -1) - (a.trackIndex ?? -1);
+  });
 
   const latest = sorted.slice(0, 8);
-
-  if (loading || latest.length === 0) return null;
 
   const gridCols = isMobile
     ? undefined
@@ -275,25 +285,81 @@ export default function LatestReleasesSection() {
     setActiveId(trackId);
   };
 
+  // Carrossel mobile — 2 cards por "página"
+  const totalSlides = Math.ceil(latest.length / 2);
+
+  const handleScroll = useCallback(() => {
+    if (!carouselRef.current) return;
+    const { scrollLeft, clientWidth } = carouselRef.current;
+    const slide = Math.round(scrollLeft / clientWidth);
+    setCurrentSlide(slide);
+  }, []);
+
+  const goToSlide = (index) => {
+    if (!carouselRef.current) return;
+    carouselRef.current.scrollTo({
+      left: index * carouselRef.current.clientWidth,
+      behavior: 'smooth',
+    });
+  };
+
+  if (loading || latest.length === 0) return null;
+
   return (
     <section className="lr-section">
       <div className="lr-inner">
-        <h2 className="lr-heading">LATEST RELEASES</h2>
-        <div
-          className="lr-grid"
-          style={gridCols ? { gridTemplateColumns: gridCols } : {}}
-        >
-          {latest.map(item => (
-            <ReleaseCard
-              key={item.id}
-              item={item}
-              playingId={playingId}
-              setPlayingId={setPlayingId}
-              setNowPlaying={setNowPlaying}
-              onActiveChange={handleActiveChange}
-            />
-          ))}
-        </div>
+        <h2 className="lr-heading">{t.common.latestReleases}</h2>
+
+        {isMobile ? (
+          <>
+            <div
+              className="lr-carousel"
+              ref={carouselRef}
+              onScroll={handleScroll}
+            >
+              {Array.from({ length: totalSlides }).map((_, slideIdx) => (
+                <div className="lr-carousel-page" key={slideIdx}>
+                  {latest.slice(slideIdx * 2, slideIdx * 2 + 2).map(item => (
+                    <ReleaseCard
+                      key={item.id}
+                      item={item}
+                      playingId={playingId}
+                      setPlayingId={setPlayingId}
+                      setNowPlaying={setNowPlaying}
+                      onActiveChange={handleActiveChange}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+            <div className="lr-dots">
+              {Array.from({ length: totalSlides }).map((_, i) => (
+                <button
+                  key={i}
+                  className={`lr-dot${i === currentSlide ? ' lr-dot--active' : ''}`}
+                  onClick={() => goToSlide(i)}
+                  aria-label={`Slide ${i + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div
+            className="lr-grid"
+            style={gridCols ? { gridTemplateColumns: gridCols } : {}}
+          >
+            {latest.map(item => (
+              <ReleaseCard
+                key={item.id}
+                item={item}
+                playingId={playingId}
+                setPlayingId={setPlayingId}
+                setNowPlaying={setNowPlaying}
+                onActiveChange={handleActiveChange}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -372,7 +372,7 @@ export default function AnalyticsDashboard() {
 
     Promise.all([getDocs(qPageviews), getDocs(qClicks)])
       .then(([pvSnap, clSnap]) => {
-        setHits(pvSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setHits(pvSnap.docs.map(d => ({ id: d.id, ...d.data() })).filter(h => h.referrer !== 'localhost' && h.referrer !== '127.0.0.1'));
         setClicks(clSnap.docs.map(d => ({ id: d.id, ...d.data() })));
       })
       .catch(err => {
@@ -424,7 +424,7 @@ export default function AnalyticsDashboard() {
     const byBrowser = topN(groupBy(hits, h => h.browser));
     const byOS = topN(groupBy(hits, h => h.os));
     const byCountry = topN(groupBy(hits, h => h.country), 10);
-    const byReferrer = topN(groupBy(hits, h => h.referrer), 10);
+    const byReferrer = topN(groupBy(hits.filter(h => h.referrer !== 'localhost' && h.referrer !== '127.0.0.1'), h => h.referrer), 10);
 
     const byClick = topN(groupBy(clicks, c => c.label), 15);
     const byClickSource = topN(groupBy(clicks, c => c.source));
