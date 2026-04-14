@@ -6,6 +6,7 @@ import MoadbSection from './components/MoadbSection';
 import SomSection from './components/SomSection';
 import JiveMindSection from './components/JiveMindSection';
 import Footer from './components/Footer';
+import SectionDivider from './components/SectionDivider';
 import { PlayerProvider } from './context/PlayerContext';
 import { useTrackVisit } from './hooks/useTrackVisit';
 import { useTrackExternalClicks } from './hooks/useTrackExternalClicks';
@@ -18,9 +19,13 @@ export default function App() {
       <div className="noise"></div>
       <Nav />
       <Hero />
+      <SectionDivider />
       <LatestReleasesSection />
+      <SectionDivider />
       <MoadbSection />
+      <SectionDivider />
       <SomSection />
+      <SectionDivider />
       <JiveMindSection />
       <Footer />
     </PlayerProvider>

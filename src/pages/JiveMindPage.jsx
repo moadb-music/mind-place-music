@@ -4,6 +4,7 @@ import { PlayerProvider, usePlayer } from '../context/PlayerContext';
 import { useTrackVisit } from '../hooks/useTrackVisit';
 import { useTrackExternalClicks } from '../hooks/useTrackExternalClicks';
 import SimplePlayer from '../components/SimplePlayer';
+import ReleaseCard from '../components/ReleaseCard';
 import '../App.css';
 import './JiveMindPage.css';
 
@@ -16,36 +17,6 @@ function getVideoId(url) {
   return '';
 }
 
-// ─── TrackItem ───────────────────────────────────────────────────────────────
-
-function TrackItem({ track, isPlaying, onPlay }) {
-  const videoId = getVideoId(track.youtubeUrl);
-  return (
-    <div className={`track-item${isPlaying ? ' track-item--playing' : ''}`}>
-      <button
-        className="audio-play-btn-mini"
-        onClick={onPlay}
-        disabled={!videoId}
-        style={!videoId ? { opacity: 0.2, cursor: 'default' } : {}}
-      >
-        {isPlaying ? (
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-            <rect x="4" y="3" width="3" height="10" />
-            <rect x="9" y="3" width="3" height="10" />
-          </svg>
-        ) : (
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M5 3l8 5-8 5V3z" />
-          </svg>
-        )}
-      </button>
-      <span className="track-name">{track.title || track.name}</span>
-    </div>
-  );
-}
-
-// ─── ReleaseCard ─────────────────────────────────────────────────────────────
-
 function getSocialLinks(release) {
   const links = [];
   if (release.links?.spotify) links.push({ icon: '/images/Spotify.png', url: release.links.spotify, name: 'Spotify' });
@@ -54,112 +25,6 @@ function getSocialLinks(release) {
   if (release.links?.ytmusic) links.push({ icon: '/images/yt-music.png', url: release.links.ytmusic, name: 'YouTube Music' });
   if (release.links?.deezer) links.push({ icon: '/images/deezer.png', url: release.links.deezer, name: 'Deezer' });
   return links;
-}
-
-function ReleaseCard({ release, playingId, setPlayingId, setNowPlaying, ARTIST }) {
-  const tracks = release.tracks || [];
-  const currentIdx = tracks.findIndex((_, i) => playingId === `${release.id}-${i}`);
-  const isAlbumPlaying = currentIdx >= 0;
-  const currentTrack = isAlbumPlaying ? tracks[currentIdx] : tracks[0];
-  const albumVideoId = getVideoId(currentTrack?.youtubeUrl);
-  const albumStart = Math.floor(currentTrack?.startSec || 0);
-  const albumEnd = Math.floor(currentTrack?.endSec || 0);
-
-  const playTrack = (idx) => {
-    if (idx >= tracks.length) { setPlayingId(null); setNowPlaying(null); return; }
-    const track = tracks[idx];
-    setPlayingId(`${release.id}-${idx}`);
-    setNowPlaying({ title: track.title || track.name, artist: ARTIST });
-  };
-
-  return (
-    <div className="release-item-with-player">
-      <div className={`release-item-header${release.type === 'SINGLE' ? ' release-item-header--single' : ''}`}>
-        {/* Col 1: capa + ícones desktop */}
-        <div className="release-cover-col">
-          <img src={release.coverUrl} alt={release.title} />
-          <div className="release-links release-links--desktop">
-            {getSocialLinks(release).map((link, idx) => (
-              <a key={idx} href={link.url} target="_blank" rel="noreferrer" className="release-link-btn" title={link.name}>
-                <img src={link.icon} alt={link.name} />
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* Col 2: info + player */}
-        <div className="release-details">
-          <span className="release-type">{release.type}</span>
-          <h4 className="release-title">{release.title}</h4>
-          <p className="release-year">{release.year}</p>
-          <div className="release-links release-links--mobile">
-            {getSocialLinks(release).map((link, idx) => (
-              <a key={idx} href={link.url} target="_blank" rel="noreferrer" className="release-link-btn" title={link.name}>
-                <img src={link.icon} alt={link.name} />
-              </a>
-            ))}
-          </div>
-
-          {release.type === 'SINGLE' && release.tracks?.[0]?.youtubeUrl && (() => {
-            const track = release.tracks[0];
-            const trackId = `${release.id}-0`;
-            const videoId = getVideoId(track.youtubeUrl);
-            const isPlaying = playingId === trackId;
-            return videoId ? (
-              <SimplePlayer
-                videoId={videoId}
-                startSec={Math.floor(track.startSec || 0)}
-                endSec={Math.floor(track.endSec || 0)}
-                isPlaying={isPlaying}
-                label={release.title}
-                onToggle={() => {
-                  if (isPlaying) { setPlayingId(null); setNowPlaying(null); }
-                  else { setPlayingId(trackId); setNowPlaying({ title: release.title, artist: ARTIST }); }
-                }}
-              />
-            ) : null;
-          })()}
-
-          {release.type !== 'SINGLE' && albumVideoId && (
-            <SimplePlayer
-              videoId={albumVideoId}
-              startSec={isAlbumPlaying ? albumStart : Math.floor(tracks[0]?.startSec || 0)}
-              endSec={isAlbumPlaying ? albumEnd : Math.floor(tracks[0]?.endSec || 0)}
-              isPlaying={isAlbumPlaying}
-              label={isAlbumPlaying ? (tracks[currentIdx]?.title || tracks[currentIdx]?.name) : 'Preview'}
-              onToggle={() => {
-                if (isAlbumPlaying) { setPlayingId(null); setNowPlaying(null); }
-                else { playTrack(0); }
-              }}
-              onEnd={() => playTrack(currentIdx + 1)}
-            />
-          )}
-        </div>
-
-        {/* Col 3: tracklist */}
-        {release.type !== 'SINGLE' && tracks.length > 0 && (
-          <div className="tracks-list-right">
-            <div className="tracks-header">Tracks</div>
-            {tracks.map((track, idx) => {
-              const trackId = `${release.id}-${idx}`;
-              const isPlaying = playingId === trackId;
-              return (
-                <TrackItem
-                  key={idx}
-                  track={track}
-                  isPlaying={isPlaying}
-                  onPlay={() => {
-                    if (isPlaying) { setPlayingId(null); setNowPlaying(null); }
-                    else { setPlayingId(trackId); setNowPlaying({ title: track.title || track.name, artist: ARTIST }); }
-                  }}
-                />
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
-  );
 }
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
@@ -336,15 +201,14 @@ function JiveMindContent() {
           {!loading && releases.length === 0 && (
             <p className="loading-text">No releases found.</p>
           )}
-          <div className="releases-list">
+          <div className="releases-list releases-list--jm">
             {releases.map(release => (
               <ReleaseCard
                 key={release.id}
                 release={release}
-                playingId={playingId}
-                setPlayingId={setPlayingId}
-                setNowPlaying={setNowPlaying}
-                ARTIST={ARTIST}
+                trackId={`jm-disc-${release.id}`}
+                artist={ARTIST}
+                project="jm"
               />
             ))}
           </div>

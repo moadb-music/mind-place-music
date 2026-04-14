@@ -237,12 +237,17 @@ export default function LatestReleasesSection() {
   const { releases: moadbReleases, loading: moadbLoading } = useSpotifyReleases();
   const { playingId, setPlayingId, setNowPlaying } = usePlayer();
   const [activeId, setActiveId] = useState(null);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.innerWidth <= 768
+  );
 
   const loading = somLoading || jmLoading || moadbLoading;
 
-  const handleActiveChange = (trackId) => {
-    setActiveId(trackId);
-  };
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   useEffect(() => {
     if (!playingId) setActiveId(null);
@@ -262,9 +267,13 @@ export default function LatestReleasesSection() {
 
   if (loading || latest.length === 0) return null;
 
-  const gridCols = latest.map(item =>
-    activeId === item.trackId ? '2fr' : '1fr'
-  ).join(' ');
+  const gridCols = isMobile
+    ? undefined
+    : latest.map(item => activeId === item.trackId ? '2fr' : '1fr').join(' ');
+
+  const handleActiveChange = (trackId) => {
+    setActiveId(trackId);
+  };
 
   return (
     <section className="lr-section">
@@ -272,7 +281,7 @@ export default function LatestReleasesSection() {
         <h2 className="lr-heading">LATEST RELEASES</h2>
         <div
           className="lr-grid"
-          style={{ gridTemplateColumns: gridCols }}
+          style={gridCols ? { gridTemplateColumns: gridCols } : {}}
         >
           {latest.map(item => (
             <ReleaseCard

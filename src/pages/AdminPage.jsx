@@ -18,6 +18,7 @@ const EMPTY_RELEASE = () => ({
   year: String(new Date().getFullYear()),
   releaseDate: '',
   coverUrl: '',
+  bgUrl: '',
   tracks: [EMPTY_TRACK()],
   links: { spotify: '', apple: '', youtube: '', ytmusic: '', deezer: '' },
 });
@@ -161,7 +162,7 @@ function ImageGalleryModal({ onSelect, onClose, coversPath = 'som/covers' }) {
 
 // ─── CoverUpload ─────────────────────────────────────────────────────────────
 
-function CoverUpload({ coverUrl, onChange, coversPath = 'som/covers' }) {
+function CoverUpload({ coverUrl, onChange, coversPath = 'som/covers', placeholder = 'Selecionar capa' }) {
   const [galleryOpen, setGalleryOpen] = useState(false);
 
   return (
@@ -189,7 +190,7 @@ function CoverUpload({ coverUrl, onChange, coversPath = 'som/covers' }) {
               <circle cx="8.5" cy="8.5" r="1.5" />
               <path d="M21 15l-5-5L5 21" />
             </svg>
-            <span>Selecionar capa</span>
+            <span>{placeholder}</span>
           </div>
         )}
       </div>
@@ -251,6 +252,19 @@ function ReleaseModal({ release, onSave, onClose, coversPath = 'som/covers' }) {
                 onChange={url => set('coverUrl', url)}
                 coversPath={coversPath}
               />
+            </div>
+
+            <div className="admin-form-group">
+              <label className="admin-label">Imagem de Fundo</label>
+              <CoverUpload
+                coverUrl={form.bgUrl}
+                onChange={url => set('bgUrl', url)}
+                coversPath={coversPath}
+                placeholder="Selecionar fundo"
+              />
+              <span style={{ fontSize: 11, color: '#555', marginTop: 4, display: 'block' }}>
+                Aparece como fundo da seção ao tocar este álbum
+              </span>
             </div>
 
             <div className="admin-form-group">
@@ -650,7 +664,7 @@ function JiveMindPanel() {
           release={editing}
           onSave={handleSave}
           onClose={() => setEditing(null)}
-          coversPath="jivemind/covers"
+          coversPath="som/covers"
         />
       )}
     </div>

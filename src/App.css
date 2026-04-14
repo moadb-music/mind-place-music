@@ -187,11 +187,24 @@ body {
   animation: fadeIn 1.5s ease-out 0.5s both;
 }
 
+/* Section Dividers - Linhas simples com fade */
+.section-divider {
+  position: relative;
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,255,255,0.1) 50%,
+    transparent 100%
+  );
+  margin: 0;
+  padding: 0;
+}
+
 /* Project Sections */
 .project-section {
   min-height: 100vh;
   padding: 120px 48px;
-  border-bottom: 1px solid var(--border);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -251,6 +264,151 @@ body {
 
 #som .release-title {
   font-family: 'Playfair Display', serif;
+}
+
+/* ── Classes base dos cards de discografia (usadas nas páginas internas) ── */
+
+.release-item-with-player {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: var(--text);
+  background: rgba(20, 20, 20, 0.7);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px;
+}
+
+.release-item-with-player:hover {
+  background: rgba(20, 20, 20, 0.9);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+}
+
+.release-item-header {
+  display: grid;
+  grid-template-columns: 200px 1fr 1fr;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.release-item-header--single {
+  grid-template-columns: 200px 1fr;
+}
+
+.release-cover-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.release-cover-col > img {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.release-cover-col .release-links {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
+  padding: 0;
+  justify-content: space-around;
+  margin: 0;
+}
+
+.tracks-list-right {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 8px;
+  align-self: stretch;
+}
+
+.tracks-list-right::-webkit-scrollbar { width: 4px; }
+.tracks-list-right::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 2px; }
+.tracks-list-right::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+.tracks-list-right::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+.tracks-header {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+
+.release-type {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  display: block;
+}
+
+.release-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.release-year {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.release-links {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.release-link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: transform 0.2s, opacity 0.2s;
+  opacity: 0.85;
+}
+
+.release-link-btn:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.release-link-btn img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.release-links--mobile { display: none; }
+.release-links--desktop { display: flex; }
+
+/* Player row */
+.release-player-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* Player ocupa toda a largura da coluna de detalhes */
@@ -366,20 +524,44 @@ body {
   box-shadow: 0 0 20px rgba(212, 168, 67, 0.4);
 }
 
+/* Botão MOADB — Metalcore */
+#moadb .btn-primary {
+  background: transparent;
+  color: #cc2200;
+  border: 1px solid #cc2200;
+  border-radius: 2px;
+  letter-spacing: 3px;
+  font-weight: 700;
+  font-size: 12px;
+  clip-path: polygon(6px 0%, 100% 0%, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0% 100%, 0% 6px);
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+#moadb .btn-primary::before {
+  display: none;
+}
+
+#moadb .btn-primary:hover {
+  background: #cc2200;
+  color: #fff;
+  box-shadow: 0 0 24px rgba(180, 20, 20, 0.5);
+  transform: translateY(-2px);
+}
+
 /* Botão lo-fi — State of Mind */
 #som .btn-primary {
   background: transparent;
-  color: #e8ddd5;
-  border: 1px solid #b8a99a;
-  border-radius: 4px;
-  letter-spacing: 2px;
+  color: #c8d4f0;
+  border: 1px solid rgba(100, 120, 180, 0.4);
+  border-radius: 6px;
+  letter-spacing: 3px;
   font-family: 'Playfair Display', serif;
   font-style: italic;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 400;
   padding: 14px 32px;
   box-shadow: none;
-  transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+  transition: background 0.4s, color 0.4s, border-color 0.4s, box-shadow 0.4s;
 }
 
 #som .btn-primary::before {
@@ -387,10 +569,10 @@ body {
 }
 
 #som .btn-primary:hover {
-  background: #b8a99a;
-  color: #1a1410;
-  border-color: #b8a99a;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  background: rgba(30, 40, 80, 0.6);
+  color: #e8eeff;
+  border-color: rgba(100, 120, 180, 0.8);
+  box-shadow: 0 0 24px rgba(80, 100, 160, 0.25), inset 0 0 20px rgba(80, 100, 160, 0.1);
   transform: translateY(-2px);
 }
 
@@ -521,117 +703,768 @@ body {
   margin-bottom: 0;
 }
 
+.releases-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
 .section-title {
   font-size: 18px;
   font-weight: 700;
-  margin-bottom: 32px;
   letter-spacing: -0.5px;
   text-transform: uppercase;
-}
-
-.releases-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.release-item-with-player {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  text-decoration: none;
-  color: var(--text);
-  background: rgba(20, 20, 20, 0.7);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.3s;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 20px;
-}
-
-.release-item-header {
-  display: grid;
-  grid-template-columns: 200px 1fr 1fr;
-  gap: 18px;
-  align-items: stretch;
-}
-
-.release-item-header--single {
-  grid-template-columns: 200px 1fr;
-}
-
-.tracks-list-right {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  max-height: 260px;
-  overflow-y: auto;
-  padding-right: 8px;
-  align-self: stretch;
-}
-
-.release-cover-col {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 200px;
-  flex-shrink: 0;
-}
-
-.release-cover-col > img {
-  width: 200px;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 8px;
-  display: block;
-}
-
-.release-cover-col .release-links {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  flex-wrap: nowrap;
-  padding: 0px;
-  justify-content: space-around;
   margin: 0;
 }
 
-.tracks-list-right::-webkit-scrollbar {
-  width: 4px;
-}
-
-.tracks-list-right::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 2px;
-}
-
-.tracks-list-right::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-}
-
-.tracks-list-right::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.tracks-header {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+.view-all-link {
+  font-size: 13px;
   color: var(--text-dim);
-  margin-bottom: 8px;
-  padding-left: 4px;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: color 0.3s ease;
+  position: relative;
 }
 
-.release-item-with-player:hover {
-  background: rgba(20, 20, 20, 0.9);
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+.view-all-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--text);
+  transition: width 0.3s ease;
 }
 
-.release-player {
-  margin-top: 16px;
+.view-all-link:hover {
+  color: var(--text);
+}
+
+.view-all-link:hover::after {
+  width: 100%;
+}
+
+.releases-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+/* Quando há um card tocando, os outros desfocam */
+.releases-list:has(.release-card--playing) .release-card:not(.release-card--playing) {
+  opacity: 0.5;
+  filter: saturate(0.3);
+  transform: scale(0.97);
+}
+
+/* Card tocando — destaque */
+.release-card--playing {
+  opacity: 1 !important;
+  filter: none !important;
+  transform: scale(1.03) !important;
+  z-index: 2;
+  position: relative;
+}
+
+/* Novo card elegante */
+.release-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: transparent;
+  border-radius: 8px;
+  overflow: visible;
+  transition: transform 0.4s ease, opacity 0.4s ease, filter 0.4s ease;
+}
+
+.release-card:hover:not(.release-card--playing) {
+  transform: translateY(-4px);
+}
+
+.release-card-cover-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1a1a1a;
+  cursor: pointer;
+}
+
+.release-card-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+.release-card-cover-wrap:hover .release-card-cover {
+  transform: scale(1.05);
+  filter: brightness(0.7);
+}
+
+/* Play button na capa */
+.release-card-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 50%;
+  color: #000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.release-card-cover-wrap:hover .release-card-play-btn {
+  opacity: 1;
+}
+
+.release-card-play-btn:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Só fica visível sem hover quando está tocando ativamente */
+.release-card-play-btn.playing {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Botão flip */
+.rc-flip-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s, color 0.2s, border-color 0.2s;
+  z-index: 4;
+}
+
+.release-card-cover-wrap:hover .rc-flip-btn {
+  opacity: 1;
+}
+
+.rc-flip-btn:hover {
+  color: #fff;
+  border-color: rgba(255,255,255,0.4);
+}
+
+/* Mobile: play e flip sempre visíveis */
+@media (hover: none) {
+  .release-card-play-btn {
+    opacity: 0.85;
+  }
+  .rc-flip-btn {
+    opacity: 1;
+  }
+}
+
+/* Timeline na parte inferior da capa */
+.release-card-timeline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 3;
+}
+
+.release-card-timeline-fill {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  transition: width 0.1s linear;
+}
+
+/* Badge de tipo */
+.release-card-type-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  padding: 4px 10px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+/* Info abaixo da capa */
+.release-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+.release-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.release-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.release-card-year {
+  font-weight: 500;
+}
+
+.release-card-links {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.release-card-link {
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.release-card-link:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.release-card-link img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+/* ── Flip Card ─────────────────────────────────────────────────────────── */
+.rc-flip {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  perspective: 1000px;
+  overflow: hidden;
+}
+
+.rc-flip-front,
+.rc-flip-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.rc-flip-front {
+  transform: rotateY(0deg);
+}
+
+.rc-flip--flipped .rc-flip-front {
+  transform: rotateY(-180deg);
+}
+
+.rc-flip-back {
+  transform: rotateY(180deg);
+  background: rgba(14, 14, 14, 0.97);
+  border: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  padding: 14px 12px 12px;
+  gap: 8px;
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+}
+
+/* Overlay escuro sobre o bgUrl para garantir legibilidade */
+.rc-flip-back::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.rc-flip-back > * {
+  position: relative;
+  z-index: 1;
+}
+
+.rc-flip--flipped .rc-flip-back {
+  transform: rotateY(0deg);
+}
+
+/* Botão de voltar no verso */
+.rc-flip-back-close {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 0 0 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  width: 100%;
+  text-align: left;
+  transition: color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rc-flip-back-close:hover {
+  color: rgba(255,255,255,0.9);
+}
+
+.rc-flip-back-close svg {
+  flex-shrink: 0;
+}
+
+
+/* Lista de tracks no verso */
+.rc-tracks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.rc-tracks-list::-webkit-scrollbar { width: 3px; }
+.rc-tracks-list::-webkit-scrollbar-track { background: transparent; }
+.rc-tracks-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+/* Track item */
+.rc-track-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px;
+  border-radius: 4px;
+  transition: background 0.2s;
+  position: relative;
+  cursor: pointer;
+}
+
+.rc-track-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.rc-track-item--playing {
+  background: rgba(255,255,255,0.07);
+}
+
+.rc-track-index {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.25);
+  width: 18px;
+  text-align: right;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.rc-track-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rc-track-name {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.rc-track-item--playing .rc-track-name {
+  color: #fff;
+}
+
+.rc-track-progress {
+  height: 2px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.rc-track-progress-fill {
+  height: 100%;
+  background: rgba(255,255,255,0.6);
+  border-radius: 1px;
+  transition: width 0.1s linear;
+}
+
+.rc-track-play-btn {
+  width: 22px;
+  height: 22px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.2s;
+  padding: 0;
+  pointer-events: none;
+}
+
+.rc-track-item:hover .rc-track-play-btn { color: #fff; }
+.rc-track-play-btn:disabled { opacity: 0.15; }
+.rc-track-item--playing .rc-track-play-btn { color: #fff; }
+
+.release-card-track-count {
+  font-size: 11px;
+  color: var(--text-dim);
+  opacity: 0.6;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.2s, color 0.2s;
+}
+
+.release-card-track-count:hover {
+  opacity: 1;
+  color: var(--text);
+}
+
+/* Estilos do verso por projeto */
+#moadb .rc-flip-back,
+.rc-flip-back--moadb {
+  border-color: rgba(180,20,20,0.2);
+}
+#moadb .rc-flip-back-close,
+.rc-flip-back--moadb .rc-flip-back-close { color: rgba(200,50,50,0.6); }
+#moadb .rc-flip-back-close:hover,
+.rc-flip-back--moadb .rc-flip-back-close:hover { color: #cc2200; }
+#moadb .rc-track-item--playing .rc-track-name,
+.rc-flip-back--moadb .rc-track-item--playing .rc-track-name { color: #ff6b6b; }
+#moadb .rc-track-progress-fill,
+.rc-flip-back--moadb .rc-track-progress-fill { background: linear-gradient(90deg, #8b0000, #cc2200); }
+#moadb .rc-track-item--playing .rc-track-index,
+.rc-flip-back--moadb .rc-track-item--playing .rc-track-index { color: rgba(200,50,50,0.7); }
+
+#som .rc-flip-back,
+.releases-list--som .rc-flip-back,
+.rc-flip-back--som {
+  border-color: rgba(100,120,180,0.2);
+  background: rgba(10,14,28,0.97);
+}
+#som .rc-flip-back-close,
+.releases-list--som .rc-flip-back-close,
+.rc-flip-back--som .rc-flip-back-close { color: rgba(100,120,180,0.6); font-family: 'Playfair Display', serif; font-style: italic; }
+#som .rc-flip-back-close:hover,
+.releases-list--som .rc-flip-back-close:hover,
+.rc-flip-back--som .rc-flip-back-close:hover { color: #c8d4f0; }
+#som .rc-track-name,
+.releases-list--som .rc-track-name,
+.rc-flip-back--som .rc-track-name { font-family: 'Playfair Display', serif; font-style: italic; color: rgba(200,190,220,0.7); }
+#som .rc-track-index,
+.releases-list--som .rc-track-index,
+.rc-flip-back--som .rc-track-index { color: rgba(100,120,180,0.5); }
+#som .rc-track-item--playing .rc-track-name,
+.releases-list--som .rc-track-item--playing .rc-track-name,
+.rc-flip-back--som .rc-track-item--playing .rc-track-name { color: #c8d4f0; }
+#som .rc-track-progress-fill,
+.releases-list--som .rc-track-progress-fill,
+.rc-flip-back--som .rc-track-progress-fill { background: rgba(184,169,154,0.9); }
+#som .rc-track-item--playing .rc-track-index,
+.releases-list--som .rc-track-item--playing .rc-track-index,
+.rc-flip-back--som .rc-track-item--playing .rc-track-index { color: rgba(100,120,180,0.8); }
+
+#jive-mind .rc-flip-back,
+.releases-list--jm .rc-flip-back,
+.rc-flip-back--jm {
+  border-color: rgba(212,168,67,0.2);
+  background: rgba(8,6,2,0.97);
+  border-left: 2px solid rgba(212,168,67,0.4);
+}
+#jive-mind .rc-flip-back-close,
+.releases-list--jm .rc-flip-back-close,
+.rc-flip-back--jm .rc-flip-back-close { color: rgba(212,168,67,0.6); font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; }
+#jive-mind .rc-flip-back-close:hover,
+.releases-list--jm .rc-flip-back-close:hover,
+.rc-flip-back--jm .rc-flip-back-close:hover { color: #f0c96a; }
+#jive-mind .rc-track-name,
+.releases-list--jm .rc-track-name,
+.rc-flip-back--jm .rc-track-name { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; font-size: 13px; color: rgba(245,234,216,0.7); }
+#jive-mind .rc-track-index,
+.releases-list--jm .rc-track-index,
+.rc-flip-back--jm .rc-track-index { color: rgba(212,168,67,0.4); }
+#jive-mind .rc-track-item--playing .rc-track-name,
+.releases-list--jm .rc-track-item--playing .rc-track-name,
+.rc-flip-back--jm .rc-track-item--playing .rc-track-name { color: #f0c96a; }
+#jive-mind .rc-track-progress-fill,
+.releases-list--jm .rc-track-progress-fill,
+.rc-flip-back--jm .rc-track-progress-fill { background: linear-gradient(90deg, #d4a843, #f0c96a); }
+#jive-mind .rc-track-item--playing .rc-track-index,
+.releases-list--jm .rc-track-item--playing .rc-track-index,
+.rc-flip-back--jm .rc-track-item--playing .rc-track-index { color: rgba(212,168,67,0.8); }
+
+.release-card-track-count {
+  font-size: 11px;
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
+/* Botão expandir */
+.rc-expand-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-dim);
+  transition: border-color 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.rc-expand-btn:hover {
+  border-color: rgba(255,255,255,0.35);
+  color: var(--text);
+}
+
+/* Estilos de tracks por projeto */
+#moadb .rc-track-item--playing .rc-track-name { color: #ff6b6b; }
+#moadb .rc-track-progress-fill { background: linear-gradient(90deg, #8b0000, #cc2200); }
+#moadb .rc-expand-btn { border-color: rgba(180,20,20,0.3); }
+#moadb .rc-expand-btn:hover { border-color: rgba(180,20,20,0.7); color: #cc2200; }
+
+#som .rc-track-item--playing .rc-track-name { color: #c8d4f0; font-style: italic; }
+#som .rc-track-progress-fill { background: rgba(184, 169, 154, 0.9); }
+#som .rc-track-name { font-family: 'Playfair Display', serif; font-style: italic; }
+#som .rc-expand-btn { border-color: rgba(100,120,180,0.3); }
+#som .rc-expand-btn:hover { border-color: rgba(100,120,180,0.7); color: #c8d4f0; }
+
+#jive-mind .rc-track-item--playing .rc-track-name { color: #f0c96a; }
+#jive-mind .rc-track-progress-fill { background: linear-gradient(90deg, #d4a843, #f0c96a); }
+#jive-mind .rc-track-name { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; font-size: 14px; }
+#jive-mind .rc-expand-btn { border-color: rgba(212,168,67,0.3); }
+#jive-mind .rc-expand-btn:hover { border-color: rgba(212,168,67,0.7); color: #d4a843; }
+
+/* Estilos específicos por projeto */
+
+/* ── MIND OF A DEAD BODY — Metalcore ── */
+#moadb .release-card-cover-wrap {
+  border-radius: 4px;
+}
+
+#moadb .release-card-cover-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(180, 20, 20, 0.0);
+  border-radius: 4px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  pointer-events: none;
+  z-index: 3;
+}
+
+#moadb .release-card-cover-wrap:hover::after {
+  border-color: rgba(180, 20, 20, 0.7);
+  box-shadow: inset 0 0 20px rgba(180, 20, 20, 0.15), 0 0 20px rgba(180, 20, 20, 0.2);
+}
+
+#moadb .release-card--playing .release-card-cover-wrap::after {
+  border-color: rgba(180, 20, 20, 0.9);
+  box-shadow: inset 0 0 30px rgba(180, 20, 20, 0.2), 0 0 30px rgba(180, 20, 20, 0.3);
+}
+
+/* Botão quadrado com cantos cortados */
+#moadb .release-card-play-btn {
+  border-radius: 2px;
+  clip-path: polygon(8px 0%, 100% 0%, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0% 100%, 0% 8px);
+  background: rgba(200, 20, 20, 0.9);
+  color: #fff;
+}
+
+#moadb .release-card-timeline-fill {
+  background: linear-gradient(90deg, #8b0000, #cc2200);
+}
+
+#moadb .release-card-type-badge {
+  background: rgba(140, 0, 0, 0.7);
+  border-radius: 2px;
+  letter-spacing: 2px;
+}
+
+#moadb .release-card-title {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ── STATE OF MIND — Lo-fi / Ambient ── */
+#som .release-card-cover-wrap,
+.releases-list--som .release-card-cover-wrap {
+  border-radius: 6px;
+}
+
+#som .release-card-cover-wrap::after,
+.releases-list--som .release-card-cover-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(100, 120, 180, 0.0);
+  border-radius: 6px;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  pointer-events: none;
+  z-index: 3;
+}
+
+#som .release-card-cover-wrap:hover::after,
+.releases-list--som .release-card-cover-wrap:hover::after {
+  border-color: rgba(100, 120, 180, 0.5);
+  box-shadow: inset 0 0 20px rgba(80, 100, 160, 0.1), 0 0 20px rgba(80, 100, 160, 0.15);
+}
+
+#som .release-card--playing .release-card-cover-wrap::after,
+.releases-list--som .release-card--playing .release-card-cover-wrap::after {
+  border-color: rgba(100, 120, 180, 0.8);
+  box-shadow: inset 0 0 30px rgba(80, 100, 160, 0.15), 0 0 30px rgba(80, 100, 160, 0.25);
+}
+
+#som .release-card-play-btn,
+.releases-list--som .release-card-play-btn {
+  background: rgba(30, 40, 80, 0.85);
+  color: #c8d4f0;
+  border: 1px solid rgba(100, 120, 180, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+#som .release-card-timeline-fill,
+.releases-list--som .release-card-timeline-fill {
+  background: rgba(184, 169, 154, 0.9);
+}
+
+#som .release-card-type-badge,
+.releases-list--som .release-card-type-badge {
+  background: rgba(20, 30, 60, 0.75);
+  border: 1px solid rgba(100, 120, 180, 0.3);
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  letter-spacing: 1px;
+}
+
+#som .release-card-title,
+.releases-list--som .release-card-title {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+}
+
+/* ── JIVE MIND — Electro Swing ── */
+#jive-mind .release-card-cover-wrap,
+.releases-list--jm .release-card-cover-wrap {
+  border-radius: 2px;
+  border-left: 2px solid rgba(212, 168, 67, 0.5);
+}
+
+#jive-mind .release-card-cover-wrap::after,
+.releases-list--jm .release-card-cover-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(212, 168, 67, 0.0);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  pointer-events: none;
+  z-index: 3;
+}
+
+#jive-mind .release-card-cover-wrap:hover::after,
+.releases-list--jm .release-card-cover-wrap:hover::after {
+  border-color: rgba(212, 168, 67, 0.5);
+  box-shadow: inset 0 0 20px rgba(212, 168, 67, 0.08), 0 0 20px rgba(212, 168, 67, 0.15);
+}
+
+#jive-mind .release-card--playing .release-card-cover-wrap::after,
+.releases-list--jm .release-card--playing .release-card-cover-wrap::after {
+  border-color: rgba(212, 168, 67, 0.8);
+  box-shadow: inset 0 0 30px rgba(212, 168, 67, 0.12), 0 0 30px rgba(212, 168, 67, 0.25);
+}
+
+#jive-mind .release-card-play-btn,
+.releases-list--jm .release-card-play-btn {
+  background: rgba(212, 168, 67, 0.95);
+  color: #0c0a06;
+  border-radius: 2px;
+}
+
+#jive-mind .release-card-play-btn.playing,
+.releases-list--jm .release-card-play-btn.playing {
+  background: #f0c96a;
+}
+
+#jive-mind .release-card-timeline-fill,
+.releases-list--jm .release-card-timeline-fill {
+  background: linear-gradient(90deg, #d4a843, #f0c96a);
+}
+
+#jive-mind .release-card-type-badge,
+.releases-list--jm .release-card-type-badge {
+  background: rgba(212, 168, 67, 0.2);
+  border: 1px solid rgba(212, 168, 67, 0.4);
+  color: #f5ead8;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 2px;
+  border-radius: 2px;
+}
+
+#jive-mind .release-card-title,
+.releases-list--jm .release-card-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 1px;
 }
 
 .custom-audio-player {
@@ -837,10 +1670,6 @@ body {
   gap: 8px;
 }
 
-/* Mobile: mobile: esconde ícones desktop, mostra ícones mobile */
-.release-links--mobile { display: none; }
-.release-links--desktop { display: flex; }
-
 @media (max-width: 768px) {
   .release-links--mobile {
     display: flex !important;
@@ -877,7 +1706,7 @@ body {
 
   /* Esconde o player no mobile */
   .nav-player {
-    display: none;
+    display: none !important;
   }
 
   .nav-links {
@@ -962,69 +1791,45 @@ body {
     text-align: center;
   }
 
+  .releases-section-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
   .section-title {
     font-size: 16px;
-    margin-bottom: 20px;
     text-align: center;
   }
 
-  /* Release cards — capa à esquerda, info à direita, tracklist abaixo */
-  .release-item-header,
-  .release-item-header--single,
-  #som .release-item-header,
-  #som .release-item-header--single {
-    display: grid !important;
-    grid-template-columns: 110px 1fr !important;
-    gap: 12px 16px;
-    text-align: left;
+  .view-all-link {
+    font-size: 12px;
   }
 
-  /* Capa: coluna 1, linha 1 */
-  .release-cover-col,
-  #som .release-cover-col {
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-    width: 110px !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 0;
+  /* Grid responsivo para os novos cards */
+  .releases-list {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 20px;
   }
 
-  .release-cover-col > img,
-  #som .release-cover-col > img {
-    width: 110px !important;
-    height: 110px !important;
-    flex-shrink: 0;
+  .release-card-title {
+    font-size: 14px;
   }
 
-  /* Detalhes + player: coluna 2, linha 1 */
-  .release-details {
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    align-items: flex-start;
-    text-align: left;
-    padding-top: 2px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+  .release-card-meta {
+    font-size: 12px;
   }
 
-  .release-title {
-    font-size: 16px;
-    white-space: normal;
-    text-align: left;
+  .release-card-play-btn {
+    width: 50px;
+    height: 50px;
   }
 
-  /* Tracklist: linha 2, span 2 colunas */
-  .tracks-list-right {
-    grid-column: 1 / -1 !important;
-    grid-row: 2 !important;
-    max-height: 180px;
-    width: 100%;
+  .release-card-link img {
+    width: 20px;
+    height: 20px;
   }
-
-  .tracks-header { text-align: left; }
-  .track-item { justify-content: flex-start; }
 
   .section-title {
     font-size: 15px;
@@ -1758,9 +2563,15 @@ body {
   .lr-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
+    min-height: unset;
   }
 
   .lr-heading {
     margin-bottom: 24px;
+  }
+
+  /* Play sempre visível no mobile */
+  .lr-cover-play {
+    opacity: 0.85;
   }
 }

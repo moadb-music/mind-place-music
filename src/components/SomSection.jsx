@@ -1,66 +1,16 @@
 import { Link } from 'react-router-dom';
 import { useSomReleases } from '../hooks/useSomReleases';
-import { usePlayer } from '../context/PlayerContext';
-import SimplePlayer from './SimplePlayer';
+import ReleaseCard from './ReleaseCard';
 
 const ARTIST = 'State of Mind';
-const PREFIX = 'som-mpm';
 
 function shortTitle(title) {
   const idx = title.indexOf(':');
   return idx !== -1 ? title.slice(idx + 1).trim() : title;
 }
 
-function getVideoId(url) {
-  if (!url) return '';
-  if (url.includes('v=')) return url.split('v=')[1].split('&')[0];
-  if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split('?')[0];
-  return '';
-}
-
-function TrackItem({ track, isPlaying, onPlay }) {
-  const videoId = getVideoId(track.youtubeUrl);
-  return (
-    <div className={`track-item${isPlaying ? ' track-item--playing' : ''}`}>
-      <button className="audio-play-btn-mini" onClick={onPlay} disabled={!videoId} style={!videoId ? { opacity: 0.2, cursor: 'default' } : {}}>
-        {isPlaying ? (
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><rect x="4" y="3" width="3" height="10" /><rect x="9" y="3" width="3" height="10" /></svg>
-        ) : (
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M5 3l8 5-8 5V3z" /></svg>
-        )}
-      </button>
-      <span className="track-name">{track.title || track.name}</span>
-    </div>
-  );
-}
-
-function getSocialLinks(release) {
-  const links = [];
-  if (release.links?.spotify) links.push({ icon: '/images/Spotify.png', url: release.links.spotify, name: 'Spotify' });
-  if (release.links?.apple) links.push({ icon: '/images/apple.png', url: release.links.apple, name: 'Apple Music' });
-  if (release.links?.youtube) links.push({ icon: '/images/youtube.png', url: release.links.youtube, name: 'YouTube' });
-  if (release.links?.ytmusic) links.push({ icon: '/images/yt-music.png', url: release.links.ytmusic, name: 'YouTube Music' });
-  if (release.links?.deezer) links.push({ icon: '/images/deezer.png', url: release.links.deezer, name: 'Deezer' });
-  return links;
-}
-
 export default function SomSection() {
   const { releases, loading } = useSomReleases();
-  const { playingId, setPlayingId, setNowPlaying } = usePlayer();
-  const latest = releases[0] || null;
-
-  const tracks = latest?.tracks || [];
-  const currentIdx = tracks.findIndex((_, i) => playingId === `${PREFIX}-${i}`);
-  const isAlbumPlaying = currentIdx >= 0;
-  const currentTrack = isAlbumPlaying ? tracks[currentIdx] : tracks[0];
-  const albumVideoId = getVideoId(currentTrack?.youtubeUrl);
-
-  const playTrack = (idx) => {
-    if (idx >= tracks.length) { setPlayingId(null); setNowPlaying(null); return; }
-    const t = tracks[idx];
-    setPlayingId(`${PREFIX}-${idx}`);
-    setNowPlaying({ title: t.title || t.name, artist: ARTIST });
-  };
 
   return (
     <section id="som" className="project-section">
@@ -73,7 +23,7 @@ export default function SomSection() {
             <p className="project-bio">
               Where late-night introspection meets rhythmic serenity. From deep chillhop textures to ambient escapes, State of Mind is your digital sanctuary for focus and calm. Immerse yourself in a twilight atmosphere designed to guide your mind through every study session and coding marathon.
             </p>
-            <a href="/state-of-mind#latest" className="btn-primary">EXPLORE STATE OF MIND</a>
+            <Link to="/state-of-mind" className="btn-primary">EXPLORE STATE OF MIND</Link>
             <div className="social-links">
               <a href="https://www.youtube.com/@SoM-Lo-Fi" target="_blank" rel="noreferrer">YouTube</a>
               <a href="https://www.instagram.com/som.lofi" target="_blank" rel="noreferrer">Instagram</a>
@@ -83,92 +33,25 @@ export default function SomSection() {
         </div>
 
         <div className="releases-section">
-          <h3 className="section-title">Latest Release</h3>
+          <div className="releases-section-header">
+            <h3 className="section-title">Latest Releases</h3>
+            <Link to="/state-of-mind" className="view-all-link">
+              Full discography →
+            </Link>
+          </div>
           {loading && <p className="loading-text">Loading...</p>}
-          {!loading && !latest && <p className="loading-text" style={{ fontSize: 13 }}>No releases yet.</p>}
-          {!loading && latest && (
+          {!loading && releases.length === 0 && <p className="loading-text" style={{ fontSize: 13 }}>No releases yet.</p>}
+          {!loading && releases.length > 0 && (
             <div className="releases-list">
-              <div className="release-item-with-player">
-                <div className={`release-item-header${latest.type === 'SINGLE' ? ' release-item-header--single' : ''}`}>
-                  <div className="release-cover-col">
-                    <img src={latest.coverUrl} alt={latest.title} />
-                    <div className="release-links release-links--desktop">
-                      {getSocialLinks(latest).map((link, i) => (
-                        <a key={i} href={link.url} target="_blank" rel="noreferrer" className="release-link-btn" title={link.name}>
-                          <img src={link.icon} alt={link.name} />
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="release-details">
-                    <span className="release-type">{latest.type}</span>
-                    <h4 className="release-title">{shortTitle(latest.title)}</h4>
-                    <p className="release-year">{latest.year}</p>
-                    <div className="release-links release-links--mobile">
-                      {getSocialLinks(latest).map((link, i) => (
-                        <a key={i} href={link.url} target="_blank" rel="noreferrer" className="release-link-btn" title={link.name}>
-                          <img src={link.icon} alt={link.name} />
-                        </a>
-                      ))}
-                    </div>
-
-                    {latest.type === 'SINGLE' && tracks[0]?.youtubeUrl && (() => {
-                      const trackId = `${PREFIX}-0`;
-                      const videoId = getVideoId(tracks[0].youtubeUrl);
-                      const isPlaying = playingId === trackId;
-                      return videoId ? (
-                        <SimplePlayer
-                          videoId={videoId}
-                          startSec={Math.floor(tracks[0].startSec || 0)}
-                          endSec={Math.floor(tracks[0].endSec || 0)}
-                          isPlaying={isPlaying}
-                          label={shortTitle(latest.title)}
-                          onToggle={() => {
-                            if (isPlaying) { setPlayingId(null); setNowPlaying(null); }
-                            else { setPlayingId(trackId); setNowPlaying({ title: latest.title, artist: ARTIST }); }
-                          }}
-                        />
-                      ) : null;
-                    })()}
-
-                    {latest.type !== 'SINGLE' && albumVideoId && (
-                      <SimplePlayer
-                        videoId={albumVideoId}
-                        startSec={isAlbumPlaying ? Math.floor(currentTrack.startSec || 0) : Math.floor(tracks[0]?.startSec || 0)}
-                        endSec={isAlbumPlaying ? Math.floor(currentTrack.endSec || 0) : Math.floor(tracks[0]?.endSec || 0)}
-                        isPlaying={isAlbumPlaying}
-                        label={isAlbumPlaying ? (currentTrack.title || currentTrack.name) : 'Preview'}
-                        onToggle={() => {
-                          if (isAlbumPlaying) { setPlayingId(null); setNowPlaying(null); }
-                          else { playTrack(0); }
-                        }}
-                        onEnd={() => playTrack(currentIdx + 1)}
-                      />
-                    )}
-
-                    <Link to="/state-of-mind" style={{ fontSize: 12, color: '#888', textDecoration: 'none', marginTop: 8, display: 'inline-block', letterSpacing: '0.5px' }}>
-                      Full discography →
-                    </Link>
-                  </div>
-
-                  {latest.type !== 'SINGLE' && tracks.length > 0 && (
-                    <div className="tracks-list-right">
-                      <div className="tracks-header">Tracks</div>
-                      {tracks.map((t, idx) => {
-                        const trackId = `${PREFIX}-${idx}`;
-                        const isPlaying = playingId === trackId;
-                        return (
-                          <TrackItem key={idx} track={t} isPlaying={isPlaying} onPlay={() => {
-                            if (isPlaying) { setPlayingId(null); setNowPlaying(null); }
-                            else { setPlayingId(trackId); setNowPlaying({ title: t.title || t.name, artist: ARTIST }); }
-                          }} />
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
+              {releases.slice(0, 4).map(release => (
+                <ReleaseCard
+                  key={release.id}
+                  release={{ ...release, title: shortTitle(release.title) }}
+                  trackId={`som-${release.id}`}
+                  artist={ARTIST}
+                  project="som"
+                />
+              ))}
             </div>
           )}
         </div>

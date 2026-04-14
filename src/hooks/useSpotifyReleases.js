@@ -29,10 +29,15 @@ export function useSpotifyReleases() {
       .then(snap => {
         if (snap.exists()) {
           const data = snap.data();
-          // Converter objeto em array e filtrar itens vazios/inválidos
           const items = Object.values(data)
             .flat()
-            .filter(item => item && item.title && item.coverUrl);
+            .filter(item => item && item.title && item.coverUrl)
+            .map(r => ({
+              ...r,
+              tracks: Array.isArray(r.tracks)
+                ? r.tracks
+                : Object.values(r.tracks || {}),
+            }));
           setReleases(items);
         }
       })
