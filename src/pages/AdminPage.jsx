@@ -9,23 +9,22 @@ import './AdminPage.css';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-const EMPTY_TRACK = () => ({ title: '', youtubeUrl: '', startSec: 0, endSec: 30 });
+const EMPTY_TRACK = () => ({ title: '', youtubeUrl: '', startSec: 0, endSec: 30, releaseDate: '' });
 
 const EMPTY_RELEASE = () => ({
   id: `release_${Date.now()}`,
   title: '',
   type: 'SINGLE',
   year: String(new Date().getFullYear()),
+  releaseDate: '',
   coverUrl: '',
   tracks: [EMPTY_TRACK()],
   links: { spotify: '', apple: '', youtube: '', ytmusic: '', deezer: '' },
 });
 
-const COVERS_PATH = 'som/covers';
-
 // ─── ImageGalleryModal ───────────────────────────────────────────────────────
 
-function ImageGalleryModal({ onSelect, onClose }) {
+function ImageGalleryModal({ onSelect, onClose, coversPath = 'som/covers' }) {
   const inputRef = useRef();
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +36,7 @@ function ImageGalleryModal({ onSelect, onClose }) {
   const fetchImages = async () => {
     setLoading(true);
     try {
-      const listRef = ref(storage, COVERS_PATH);
+      const listRef = ref(storage, coversPath);
       const result = await listAll(listRef);
       const items = await Promise.all(
         result.items.map(async (item) => ({
@@ -63,7 +62,7 @@ function ImageGalleryModal({ onSelect, onClose }) {
     setUploading(true);
     setUploadProgress(0);
 
-    const storageRef = ref(storage, `${COVERS_PATH}/${Date.now()}_${file.name}`);
+    const storageRef = ref(storage, `${coversPath}/${Date.now()}_${file.name}`);
     const task = uploadBytesResumable(storageRef, file);
 
     task.on('state_changed',
@@ -162,29 +161,44 @@ function ImageGalleryModal({ onSelect, onClose }) {
 
 // ─── CoverUpload ─────────────────────────────────────────────────────────────
 
-function CoverUpload({ coverUrl, onChange }) {
+function CoverUpload({ coverUrl, onChange, coversPath = 'som/covers' }) {
   const [galleryOpen, setGalleryOpen] = useState(false);
 
   return (
     <>
-      <div className="admin-cover-upload">
-        {coverUrl
-          ? <img src={coverUrl} alt="capa" className="admin-cover-preview" />
-          : <div className="admin-cover-preview admin-cover-empty">sem capa</div>
-        }
-        <button
-          type="button"
-          className="admin-btn-ghost"
-          onClick={() => setGalleryOpen(true)}
-        >
-          {coverUrl ? 'Trocar capa' : 'Selecionar capa'}
-        </button>
+      <div className="admin-cover-upload" onClick={() => setGalleryOpen(true)}>
+        {coverUrl ? (
+          <>
+            <img src={coverUrl} alt="capa" className="admin-cover-preview" />
+            <button
+              type="button"
+              className="admin-cover-remove"
+              onClick={e => { e.stopPropagation(); onChange(''); }}
+              title="Remover capa"
+            >
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+              </svg>
+            </button>
+            <div className="admin-cover-hover-label">Trocar capa</div>
+          </>
+        ) : (
+          <div className="admin-cover-empty-large">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="M21 15l-5-5L5 21" />
+            </svg>
+            <span>Selecionar capa</span>
+          </div>
+        )}
       </div>
 
       {galleryOpen && (
         <ImageGalleryModal
           onSelect={onChange}
           onClose={() => setGalleryOpen(false)}
+          coversPath={coversPath}
         />
       )}
     </>
@@ -193,7 +207,7 @@ function CoverUpload({ coverUrl, onChange }) {
 
 // ─── ReleaseModal ────────────────────────────────────────────────────────────
 
-function ReleaseModal({ release, onSave, onClose }) {
+function ReleaseModal({ release, onSave, onClose, coversPath = 'som/covers' }) {
   const [form, setForm] = useState(() => JSON.parse(JSON.stringify(release)));
 
   const set = (field, value) => setForm(f => ({ ...f, [field]: value }));
@@ -208,9 +222,13 @@ function ReleaseModal({ release, onSave, onClose }) {
   const removeTrack = (idx) =>
     setForm(f => ({ ...f, tracks: f.tracks.filter((_, i) => i !== idx) }));
 
+  const [confirmRemove, setConfirmRemove] = useState(null); // idx da track pedindo confirmação
+
   return (
     <div className="admin-modal-overlay">
-      <div className="admin-modal" onClick={e => e.stopPropagation()}>
+      <div className="admin-modal admin-modal--wide" onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
         <div className="admin-modal-header">
           <span className="admin-modal-title">{release.title ? 'Editar Release' : 'Novo Release'}</span>
           <button className="admin-btn-icon" onClick={onClose}>
@@ -220,99 +238,154 @@ function ReleaseModal({ release, onSave, onClose }) {
           </button>
         </div>
 
-        <div className="admin-form-group">
-          <label className="admin-label">Título</label>
-          <input className="admin-input" value={form.title} onChange={e => set('title', e.target.value)} placeholder="Nome do release" />
-        </div>
+        {/* Corpo em duas colunas */}
+        <div className="admin-modal-body">
 
-        <div className="admin-form-row">
-          <div className="admin-form-group">
-            <label className="admin-label">Tipo</label>
-            <select className="admin-select" value={form.type} onChange={e => set('type', e.target.value)}>
-              <option value="SINGLE">Single</option>
-              <option value="EP">EP</option>
-              <option value="ALBUM">Album</option>
-            </select>
-          </div>
-          <div className="admin-form-group">
-            <label className="admin-label">Ano</label>
-            <input className="admin-input" value={form.year} onChange={e => set('year', e.target.value)} placeholder="2025" />
-          </div>
-        </div>
+          {/* ── Col esquerda: capa + info + links ── */}
+          <div className="admin-modal-col-left">
 
-        <div className="admin-form-group">
-          <label className="admin-label">Capa</label>
-          <CoverUpload
-            coverUrl={form.coverUrl}
-            onChange={url => set('coverUrl', url)}
-          />
-        </div>
-
-        <div className="admin-form-group">
-          <label className="admin-label">Links de Streaming</label>
-          <div className="admin-links-grid">
-            {['spotify', 'apple', 'youtube', 'ytmusic', 'deezer'].map(key => (
-              <input
-                key={key}
-                className="admin-input"
-                value={form.links?.[key] || ''}
-                onChange={e => setLink(key, e.target.value)}
-                placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+            <div className="admin-form-group">
+              <label className="admin-label">Capa</label>
+              <CoverUpload
+                coverUrl={form.coverUrl}
+                onChange={url => set('coverUrl', url)}
+                coversPath={coversPath}
               />
-            ))}
-          </div>
-        </div>
+            </div>
 
-        <div className="admin-form-group">
-          <div className="admin-tracks-header">
-            <label className="admin-label">Tracks</label>
-            <button className="admin-btn-ghost" onClick={addTrack}>+ Adicionar</button>
-          </div>
-          <div className="admin-tracks">
-            {form.tracks.map((track, idx) => (
-              <div key={idx} className="admin-track-row">
-                <input
-                  className="admin-input"
-                  value={track.title}
-                  onChange={e => setTrack(idx, 'title', e.target.value)}
-                  placeholder={`Track ${idx + 1}`}
-                />
-                <input
-                  className="admin-input"
-                  value={track.youtubeUrl}
-                  onChange={e => setTrack(idx, 'youtubeUrl', e.target.value)}
-                  placeholder="YouTube URL"
-                />
-                <input
-                  className="admin-input"
-                  type="number"
-                  value={track.startSec}
-                  onChange={e => setTrack(idx, 'startSec', Number(e.target.value))}
-                  placeholder="Start"
-                  title="Start (seg)"
-                />
-                <input
-                  className="admin-input"
-                  type="number"
-                  value={track.endSec}
-                  onChange={e => setTrack(idx, 'endSec', Number(e.target.value))}
-                  placeholder="End"
-                  title="End (seg)"
-                />
-                <button className="admin-btn-icon" onClick={() => removeTrack(idx)} disabled={form.tracks.length === 1}>
-                  <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                  </svg>
-                </button>
+            <div className="admin-form-group">
+              <label className="admin-label">Título</label>
+              <input className="admin-input" value={form.title} onChange={e => set('title', e.target.value)} placeholder="Nome do release" />
+            </div>
+
+            <div className="admin-form-row">
+              <div className="admin-form-group">
+                <label className="admin-label">Tipo</label>
+                <select className="admin-select" value={form.type} onChange={e => set('type', e.target.value)}>
+                  <option value="SINGLE">Single</option>
+                  <option value="EP">EP</option>
+                  <option value="ALBUM">Album</option>
+                </select>
               </div>
-            ))}
-          </div>
-        </div>
+              <div className="admin-form-group">
+                <label className="admin-label">Ano</label>
+                <input className="admin-input" value={form.year} onChange={e => set('year', e.target.value)} placeholder="2025" />
+              </div>
+            </div>
 
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+            <div className="admin-form-group">
+              <label className="admin-label">Lançamento do release</label>
+              <input
+                className="admin-input"
+                type="date"
+                value={form.releaseDate || ''}
+                onChange={e => set('releaseDate', e.target.value)}
+                title="Preencha para lançar o release completo na seção Latest Releases"
+              />
+              <span style={{ fontSize: 11, color: '#555', marginTop: 2 }}>
+                Preencha ao finalizar o release — aparecerá como card único no Latest Releases
+              </span>
+            </div>
+
+            <div className="admin-form-group">
+              <label className="admin-label">Links de Streaming</label>
+              <div className="admin-links-grid">
+                {['spotify', 'apple', 'youtube', 'ytmusic', 'deezer'].map(key => (
+                  <input
+                    key={key}
+                    className="admin-input"
+                    value={form.links?.[key] || ''}
+                    onChange={e => setLink(key, e.target.value)}
+                    placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+                  />
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* ── Col direita: tracks ── */}
+          <div className="admin-modal-col-right">
+            <div className="admin-tracks-header">
+              <label className="admin-label">Tracks</label>
+              <button className="admin-btn-ghost" onClick={addTrack}>+ Adicionar</button>
+            </div>
+            <div className="admin-tracks">
+              {[...form.tracks].reverse().map((track, reversedIdx) => {
+                const idx = form.tracks.length - 1 - reversedIdx;
+                return (
+                  <div key={idx} className="admin-track-row">
+                    {/* Linha 1: número + título + link */}
+                    <div className="admin-track-row-top">
+                      <span className="admin-track-num">#{idx + 1}</span>
+                      <input
+                        className="admin-input"
+                        value={track.title}
+                        onChange={e => setTrack(idx, 'title', e.target.value)}
+                        placeholder={`Track ${idx + 1}`}
+                      />
+                      <input
+                        className="admin-input"
+                        value={track.youtubeUrl}
+                        onChange={e => setTrack(idx, 'youtubeUrl', e.target.value)}
+                        placeholder="YouTube URL"
+                      />
+                    </div>
+                    {/* Linha 2: start, end, data, remover */}
+                    <div className="admin-track-row-bottom">
+                      <input
+                        className="admin-input"
+                        type="number"
+                        value={track.startSec}
+                        onChange={e => setTrack(idx, 'startSec', Number(e.target.value))}
+                        placeholder="Início (s)"
+                        title="Início (segundos)"
+                      />
+                      <input
+                        className="admin-input"
+                        type="number"
+                        value={track.endSec}
+                        onChange={e => setTrack(idx, 'endSec', Number(e.target.value))}
+                        placeholder="Fim (s)"
+                        title="Fim (segundos)"
+                      />
+                      <input
+                        className="admin-input"
+                        type="date"
+                        value={track.releaseDate || ''}
+                        onChange={e => setTrack(idx, 'releaseDate', e.target.value)}
+                        title="Data de lançamento"
+                      />
+                      {confirmRemove === idx ? (
+                        <div className="admin-track-confirm">
+                          <span className="admin-track-confirm-text">Remover?</span>
+                          <button className="admin-track-confirm-yes" onClick={() => { removeTrack(idx); setConfirmRemove(null); }}>Sim</button>
+                          <button className="admin-track-confirm-no" onClick={() => setConfirmRemove(null)}>Não</button>
+                        </div>
+                      ) : (
+                        <button
+                          className="admin-track-remove"
+                          disabled={form.tracks.length === 1}
+                          onClick={() => setConfirmRemove(idx)}
+                        >
+                          Remover
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>{/* fim admin-modal-body */}
+
+        {/* Footer */}
+        <div className="admin-modal-footer">
           <button className="admin-btn-ghost" onClick={onClose}>Cancelar</button>
           <button className="admin-btn-primary" onClick={() => onSave(form)}>Salvar</button>
         </div>
+
       </div>
     </div>
   );
@@ -444,6 +517,7 @@ function SomPanel() {
           release={editing}
           onSave={handleSave}
           onClose={() => setEditing(null)}
+          coversPath="som/covers"
         />
       )}
     </div>
@@ -576,6 +650,7 @@ function JiveMindPanel() {
           release={editing}
           onSave={handleSave}
           onClose={() => setEditing(null)}
+          coversPath="jivemind/covers"
         />
       )}
     </div>

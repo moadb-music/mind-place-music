@@ -378,7 +378,7 @@
   background: #141414;
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 16px;
-  padding: 32px;
+  padding: 28px 32px;
   width: 100%;
   max-width: 600px;
   max-height: 90vh;
@@ -388,35 +388,70 @@
   gap: 20px;
 }
 
-.admin-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.admin-modal-title {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.admin-form-group {
+/* Modal largo para o ReleaseModal de duas colunas */
+.admin-modal--wide {
+  max-width: 960px;
+  max-height: 90vh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0;
+  padding: 0;
 }
 
-.admin-form-row {
+.admin-modal--wide .admin-modal-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+
+.admin-modal-body {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: 280px 1fr;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
-.admin-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: #666;
+/* Coluna esquerda — scroll próprio com borda direita */
+.admin-modal-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  padding: 20px 24px;
+  border-right: 1px solid rgba(255,255,255,0.07);
+}
+
+/* Coluna direita — scroll próprio */
+.admin-modal-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  padding: 20px 24px;
+}
+
+.admin-modal-col-right .admin-tracks-header {
+  flex-shrink: 0;
+  margin-bottom: 12px;
+}
+
+.admin-modal-col-right .admin-tracks {
+  overflow-y: auto;
+  flex: 1;
+  padding-right: 6px;
+}
+
+.admin-modal-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 16px 28px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
 }
 
 /* ── Tracks ─────────────────────────────────────────────────────── */
@@ -427,10 +462,116 @@
 }
 
 .admin-track-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+}
+
+.admin-track-row-top {
   display: grid;
-  grid-template-columns: 1fr 120px 80px 80px 30px;
+  grid-template-columns: 28px 1fr 1fr;
   gap: 8px;
   align-items: center;
+}
+
+.admin-track-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: #555;
+  text-align: center;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.admin-track-row-bottom {
+  display: grid;
+  grid-template-columns: 90px 90px 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.admin-track-row-bottom .admin-input[type="number"] {
+  width: 100%;
+}
+
+.admin-track-row-bottom .admin-input[type="date"] {
+  width: 100%;
+}
+
+
+.admin-track-remove {
+  margin-left: auto;
+  padding: 6px 14px;
+  background: transparent;
+  color: #e05555;
+  border: 1px solid rgba(224,85,85,0.3);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.admin-track-remove:hover {
+  background: rgba(224,85,85,0.12);
+  border-color: rgba(224,85,85,0.6);
+}
+
+.admin-track-remove:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+/* Confirmação inline de remoção */
+.admin-track-confirm {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.admin-track-confirm-text {
+  font-size: 12px;
+  color: #e05555;
+  white-space: nowrap;
+}
+
+.admin-track-confirm-yes {
+  padding: 5px 12px;
+  background: #e05555;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.admin-track-confirm-yes:hover { opacity: 0.85; }
+
+.admin-track-confirm-no {
+  padding: 5px 12px;
+  background: transparent;
+  color: #888;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.admin-track-confirm-no:hover {
+  color: #fff;
+  border-color: rgba(255,255,255,0.3);
 }
 
 .admin-tracks-header {
@@ -449,36 +590,107 @@
 
 /* ── Cover Upload ───────────────────────────────────────────────── */
 .admin-cover-upload {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%; /* força quadrado */
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.admin-cover-upload:hover {
+  border-color: rgba(255,255,255,0.25);
 }
 
 .admin-cover-preview {
-  width: 80px;
-  height: 80px;
-  border-radius: 8px;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  flex-shrink: 0;
-  border: 1px solid rgba(255,255,255,0.1);
+  display: block;
+  transition: filter 0.25s;
 }
 
-.admin-cover-empty {
-  background: #1a1a1a;
+.admin-cover-upload:hover .admin-cover-preview {
+  filter: brightness(0.55);
+}
+
+/* X de remover — aparece no hover */
+.admin-cover-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  color: #444;
-  letter-spacing: 0.5px;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s;
+  z-index: 2;
 }
 
-.admin-cover-actions {
+.admin-cover-upload:hover .admin-cover-remove {
+  opacity: 1;
+}
+
+.admin-cover-remove:hover {
+  background: rgba(220, 60, 60, 0.85);
+  border-color: transparent;
+}
+
+/* Label "Trocar capa" centralizado no hover */
+.admin-cover-hover-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.5px;
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+
+.admin-cover-upload:hover .admin-cover-hover-label {
+  opacity: 1;
+}
+
+/* Estado vazio */
+.admin-cover-empty-large {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #444;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  transition: color 0.2s;
 }
+
+.admin-cover-upload:hover .admin-cover-empty-large {
+  color: #888;
+}
+
+.admin-cover-empty { display: none; }
+.admin-cover-actions { display: none; }
 
 /* ── Gallery Modal ──────────────────────────────────────────────── */
 .admin-gallery-modal {
@@ -580,7 +792,30 @@
   padding: 48px 0;
 }
 
-/* ── Scrollbar ──────────────────────────────────────────────────── */
-.admin-modal::-webkit-scrollbar { width: 4px; }
-.admin-modal::-webkit-scrollbar-track { background: transparent; }
-.admin-modal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+/* ── Scrollbar global do admin ──────────────────────────────────── */
+.admin-modal ::-webkit-scrollbar,
+.admin-modal-col-left::-webkit-scrollbar,
+.admin-modal-col-right::-webkit-scrollbar,
+.admin-modal-col-right .admin-tracks::-webkit-scrollbar,
+.admin-gallery-grid::-webkit-scrollbar { width: 3px; }
+
+.admin-modal ::-webkit-scrollbar-track,
+.admin-modal-col-left::-webkit-scrollbar-track,
+.admin-modal-col-right::-webkit-scrollbar-track,
+.admin-modal-col-right .admin-tracks::-webkit-scrollbar-track,
+.admin-gallery-grid::-webkit-scrollbar-track { background: transparent; }
+
+.admin-modal ::-webkit-scrollbar-thumb,
+.admin-modal-col-left::-webkit-scrollbar-thumb,
+.admin-modal-col-right::-webkit-scrollbar-thumb,
+.admin-modal-col-right .admin-tracks::-webkit-scrollbar-thumb,
+.admin-gallery-grid::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+}
+
+.admin-modal ::-webkit-scrollbar-thumb:hover,
+.admin-modal-col-left::-webkit-scrollbar-thumb:hover,
+.admin-modal-col-right .admin-tracks::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}

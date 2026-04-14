@@ -1,6 +1,7 @@
 import './App.css';
 import Nav from './components/Nav';
 import Hero from './components/Hero';
+import LatestReleasesSection from './components/LatestReleasesSection';
 import MoadbSection from './components/MoadbSection';
 import SomSection from './components/SomSection';
 import JiveMindSection from './components/JiveMindSection';
@@ -17,6 +18,7 @@ export default function App() {
       <div className="noise"></div>
       <Nav />
       <Hero />
+      <LatestReleasesSection />
       <MoadbSection />
       <SomSection />
       <JiveMindSection />

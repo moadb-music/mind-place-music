@@ -14,23 +14,36 @@ const PERIODS = [
 
 const CHART_MODES = ['Linha', 'Barras'];
 
-function getStartDate(period, customDate) {
-  const now = new Date();
+// Retorna a data atual no fuso de São Paulo (America/Sao_Paulo) como YYYY-MM-DD
+function todayInSP() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
+}
+
+function getStartDate(period, customDate, rangeEndDate) {
   if (period.mode === 'today') {
-    // Se tem data customizada, usa ela; senão usa hoje
-    const base = customDate ? new Date(customDate + 'T00:00:00') : new Date(now);
+    const base = customDate ? new Date(customDate + 'T00:00:00') : new Date();
     base.setHours(0, 0, 0, 0);
     return base;
   }
-  const d = new Date(now);
-  d.setHours(d.getHours() - period.hours);
-  return d;
+  // rolling: começa N dias antes da data de fim escolhida
+  const end = rangeEndDate ? new Date(rangeEndDate + 'T23:59:59') : new Date();
+  const start = new Date(end);
+  start.setDate(start.getDate() - (period.hours / 24) + 1);
+  start.setHours(0, 0, 0, 0);
+  return start;
 }
 
-function getEndDate(period, customDate) {
-  if (period.mode === 'today' && customDate) {
-    const end = new Date(customDate + 'T23:59:59');
-    return end;
+function getEndDate(period, customDate, rangeEndDate) {
+  if (period.mode === 'today') {
+    if (customDate) return new Date(customDate + 'T23:59:59');
+    return new Date();
+  }
+  // rolling: termina no fim do dia da data escolhida (ou agora se for hoje)
+  if (rangeEndDate) {
+    const end = new Date(rangeEndDate + 'T23:59:59');
+    // Se a data escolhida é hoje, usa o momento atual para não pegar dados futuros
+    const todayEnd = new Date(todayInSP() + 'T23:59:59');
+    return end >= todayEnd ? new Date() : end;
   }
   return new Date();
 }
@@ -238,8 +251,6 @@ function TimeChart({ data, mode, period }) {
   }));
 
   const showDots = data.length <= 31;
-  // Raio da hit area: metade do espaço entre pontos, mínimo 12px
-  const hitR = Math.max(12, (innerW / Math.max(data.length - 1, 1)) / 2);
 
   return (
     <div ref={containerRef} style={{ width: '100%', position: 'relative' }}>
@@ -265,29 +276,50 @@ function TimeChart({ data, mode, period }) {
         {/* Area */}
         {hasData && <path d={areaD} fill="url(#areaGrad)" />}
 
+        {/* Linha vertical pontilhada no hover */}
+        {tooltip && (
+          <line
+            x1={tooltip.x} y1={pad.top}
+            x2={tooltip.x} y2={pad.top + innerH}
+            stroke="rgba(255,255,255,0.25)"
+            strokeWidth="1"
+            strokeDasharray="4 4"
+          />
+        )}
+
         {/* Line */}
         <path d={pathD} fill="none" stroke="#c8a84b" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
 
-        {/* Dots + hit areas */}
-        {pts.map((p, i) => (
-          <g key={i}>
-            {showDots && (
-              <circle cx={p.x} cy={p.y} r="3.5" fill="#c8a84b" stroke="#141414" strokeWidth="1.5" />
-            )}
-            <circle
-              cx={p.x} cy={p.y} r={hitR}
-              fill="transparent"
-              style={{ cursor: 'crosshair' }}
-              onMouseEnter={() => setTooltip({
-                x: p.x,
-                y: Math.max(0, p.y - 48),
-                label: fullLabel(p.key, period),
-                count: p.count,
-              })}
-              onMouseLeave={hideTooltip}
-            />
-          </g>
-        ))}
+        {/* Dots + hit areas verticais */}
+        {pts.map((p, i) => {
+          // Largura da faixa: metade da distância para o vizinho de cada lado
+          const prevX = i > 0 ? pts[i - 1].x : p.x;
+          const nextX = i < pts.length - 1 ? pts[i + 1].x : p.x;
+          const halfLeft = (p.x - prevX) / 2;
+          const halfRight = (nextX - p.x) / 2;
+          const slotX = p.x - halfLeft;
+          const slotW = halfLeft + halfRight;
+          return (
+            <g key={i}>
+              {showDots && (
+                <circle cx={p.x} cy={p.y} r="3.5" fill="#c8a84b" stroke="#141414" strokeWidth="1.5" />
+              )}
+              {/* Faixa vertical invisível — ativa o tooltip em toda a altura */}
+              <rect
+                x={slotX} y={pad.top} width={Math.max(slotW, 8)} height={innerH}
+                fill="transparent"
+                style={{ cursor: 'crosshair' }}
+                onMouseEnter={() => setTooltip({
+                  x: p.x,
+                  y: Math.max(0, p.y - 48),
+                  label: fullLabel(p.key, period),
+                  count: p.count,
+                })}
+                onMouseLeave={hideTooltip}
+              />
+            </g>
+          );
+        })}
 
         {/* X labels */}
         {pts.map((p, i) =>
@@ -322,25 +354,21 @@ export default function AnalyticsDashboard() {
   const [hits, setHits] = useState([]);
   const [clicks, setClicks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [customDate, setCustomDate] = useState(''); // YYYY-MM-DD
+  const [customDate, setCustomDate] = useState(() => todayInSP());   // para modo 'today'
+  const [rangeEndDate, setRangeEndDate] = useState(() => todayInSP()); // para modo 'rolling'
 
   const period = PERIODS[periodIdx];
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = todayInSP();
 
   useEffect(() => {
     setLoading(true);
-    const start = getStartDate(period, customDate);
-    const end = getEndDate(period, customDate);
+    const start = getStartDate(period, customDate, rangeEndDate);
+    const end = getEndDate(period, customDate, rangeEndDate);
     const since = Timestamp.fromDate(start);
     const until = Timestamp.fromDate(end);
 
-    const qPageviews = period.mode === 'today' && customDate
-      ? query(collection(db, 'analytics'), where('ts', '>=', since), where('ts', '<=', until))
-      : query(collection(db, 'analytics'), where('ts', '>=', since));
-
-    const qClicks = period.mode === 'today' && customDate
-      ? query(collection(db, 'analytics_clicks'), where('ts', '>=', since), where('ts', '<=', until))
-      : query(collection(db, 'analytics_clicks'), where('ts', '>=', since));
+    const qPageviews = query(collection(db, 'analytics'), where('ts', '>=', since), where('ts', '<=', until));
+    const qClicks = query(collection(db, 'analytics_clicks'), where('ts', '>=', since), where('ts', '<=', until));
 
     Promise.all([getDocs(qPageviews), getDocs(qClicks)])
       .then(([pvSnap, clSnap]) => {
@@ -353,7 +381,7 @@ export default function AnalyticsDashboard() {
         setClicks([]);
       })
       .finally(() => setLoading(false));
-  }, [periodIdx, customDate]);
+  }, [periodIdx, customDate, rangeEndDate]);
 
   const stats = useMemo(() => {
     const pageviews = hits.length;
@@ -374,7 +402,8 @@ export default function AnalyticsDashboard() {
     });
 
     const timeData = [];
-    const start = getStartDate(period, customDate);
+    const start = getStartDate(period, customDate, rangeEndDate);
+    const end = getEndDate(period, customDate, rangeEndDate);
 
     if (period.mode === 'today') {
       const dayStart = new Date(start);
@@ -384,8 +413,7 @@ export default function AnalyticsDashboard() {
         timeData.push({ key, count: buckets[key] || 0 });
       }
     } else {
-      const now = new Date();
-      for (let d = new Date(start); d <= now; d.setDate(d.getDate() + 1)) {
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         timeData.push({ key, count: buckets[key] || 0 });
       }
@@ -402,16 +430,22 @@ export default function AnalyticsDashboard() {
     const byClickSource = topN(groupBy(clicks, c => c.source));
 
     return { pageviews, sessions, pages, countries, timeData, byPage, byDevice, byBrowser, byOS, byCountry, byReferrer, byClick, byClickSource, totalClicks: clicks.length };
-  }, [hits, clicks, period, customDate]);
+  }, [hits, clicks, period, customDate, rangeEndDate]);
 
-  const chartDateLabel = period.mode === 'today'
-    ? customDate
-      ? new Date(customDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-      : 'HOJE'
-    : null;
-  const chartLabel = period.mode === 'today'
-    ? `PAGEVIEWS — ${chartDateLabel} (POR HORA)`
-    : 'PAGEVIEWS — POR DIA';
+  // Label do gráfico
+  const fmtDate = (str) => str
+    ? new Date(str + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : '';
+
+  let chartLabel;
+  if (period.mode === 'today') {
+    const label = customDate ? fmtDate(customDate) : 'HOJE';
+    chartLabel = `PAGEVIEWS — ${label} (POR HORA)`;
+  } else {
+    const startDate = getStartDate(period, customDate, rangeEndDate);
+    const startStr = startDate.toLocaleDateString('en-CA');
+    chartLabel = `PAGEVIEWS — ${fmtDate(startStr)} até ${fmtDate(rangeEndDate || todayStr)}`;
+  }
 
   return (
     <div className="dash-wrap">
@@ -420,7 +454,12 @@ export default function AnalyticsDashboard() {
           <button
             key={p.label}
             className={`dash-period-btn${periodIdx === i ? ' active' : ''}`}
-            onClick={() => { setPeriodIdx(i); if (i !== 0) setCustomDate(''); }}
+            onClick={() => {
+              setPeriodIdx(i);
+              // Ao trocar de período, reseta para hoje
+              if (i === 0) setCustomDate(todayStr);
+              else setRangeEndDate(todayStr);
+            }}
           >
             {p.label}
           </button>
@@ -450,6 +489,16 @@ export default function AnalyticsDashboard() {
                     max={todayStr}
                     onChange={e => setCustomDate(e.target.value)}
                     title="Selecionar data"
+                  />
+                )}
+                {period.mode === 'rolling' && (
+                  <input
+                    type="date"
+                    className="dash-date-input"
+                    value={rangeEndDate}
+                    max={todayStr}
+                    onChange={e => setRangeEndDate(e.target.value)}
+                    title="Data de fim do período"
                   />
                 )}
                 <div className="dash-chart-modes">

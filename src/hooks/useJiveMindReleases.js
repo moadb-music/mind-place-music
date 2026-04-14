@@ -18,7 +18,15 @@ export function useJiveMindReleases() {
               ? r.tracks
               : Object.values(r.tracks || {}),
           }));
+          console.log('[JiveMind] releases carregados:', normalized.map(r => ({
+            id: r.id,
+            title: r.title,
+            type: r.type,
+            tracks: r.tracks?.map(t => ({ title: t.title, youtubeUrl: t.youtubeUrl, startSec: t.startSec, endSec: t.endSec })),
+          })));
           setReleases(normalized);
+        } else {
+          console.warn('[JiveMind] documento jivemind_discography não encontrado');
         }
       })
       .catch(e => console.error('Erro ao buscar discografia Jive Mind:', e))

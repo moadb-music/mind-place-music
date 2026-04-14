@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useSomReleases } from '../hooks/useSomReleases';
 import { PlayerProvider, usePlayer } from '../context/PlayerContext';
 import { useTrackVisit } from '../hooks/useTrackVisit';
 import { useTrackExternalClicks } from '../hooks/useTrackExternalClicks';
 import { trackClick } from '../hooks/useTrackClick';
+import SimplePlayer from '../components/SimplePlayer';
 import '../App.css';
 import './StateOfMindPage.css';
 
@@ -15,78 +15,6 @@ function getVideoId(url) {
   if (url.includes('v=')) return url.split('v=')[1].split('&')[0];
   if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split('?')[0];
   return '';
-}
-
-function formatTime(sec) {
-  const s = Math.floor(sec);
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-}
-
-// ─── SimplePlayer ────────────────────────────────────────────────────────────
-
-function SimplePlayer({ videoId, startSec, endSec, isPlaying, onToggle, onEnd, label }) {
-  const duration = (endSec - startSec) || 30;
-  const [progress, setProgress] = useState(0);
-  const intervalRef = useRef(null);
-  const iframeRef = useRef(null);
-
-  useEffect(() => {
-    if (!iframeRef.current) return;
-    if (isPlaying) {
-      iframeRef.current.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${Math.floor(startSec)}&end=${Math.floor(endSec)}`;
-    } else {
-      iframeRef.current.src = '';
-    }
-  }, [isPlaying, videoId, startSec, endSec]);
-
-  useEffect(() => {
-    if (isPlaying) {
-      setProgress(0);
-      intervalRef.current = setInterval(() => {
-        setProgress(p => {
-          if (p >= 100) { clearInterval(intervalRef.current); if (onEnd) onEnd(); return 0; }
-          return p + (100 / (duration * 10));
-        });
-      }, 100);
-    } else {
-      clearInterval(intervalRef.current);
-      setProgress(0);
-    }
-    return () => clearInterval(intervalRef.current);
-  }, [isPlaying, duration]);
-
-  return (
-    <div className="simple-player">
-      <div style={{ overflow: 'hidden', height: '1px', width: '1px', position: 'absolute', pointerEvents: 'none', left: '-9999px' }}>
-        <iframe ref={iframeRef} width="1" height="1" title="audio" allow="autoplay" />
-      </div>
-      <div className="simple-player-top">
-        <button className="simple-play-btn" onClick={onToggle}>
-          {isPlaying ? (
-            <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor">
-              <rect x="4" y="3" width="3" height="10" />
-              <rect x="9" y="3" width="3" height="10" />
-            </svg>
-          ) : (
-            <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M5 3l8 5-8 5V3z" />
-            </svg>
-          )}
-        </button>
-        <span className="simple-player-label">{isPlaying && label ? label : 'Preview'}</span>
-      </div>
-      <div className="simple-player-timeline">
-        <div className="simple-player-bar">
-          <div className="simple-player-fill" style={{ width: `${progress}%` }} />
-          <div className="simple-player-thumb" style={{ left: `${progress}%` }} />
-        </div>
-        <div className="simple-player-time">
-          <span>{formatTime(startSec + (progress / 100) * duration)}</span>
-          <span>{formatTime(endSec)}</span>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 // ─── TrackItem ───────────────────────────────────────────────────────────────
@@ -239,7 +167,7 @@ function ReleaseCard({ release, playingId, setPlayingId, setNowPlaying, ARTIST }
 
 function StateOfMindContent() {
   const { releases, loading } = useSomReleases();
-  const { playingId, setPlayingId, nowPlaying, setNowPlaying } = usePlayer();
+  const { playingId, setPlayingId, nowPlaying, setNowPlaying, isPaused, togglePause, stop, progress } = usePlayer();
   const ARTIST = 'State of Mind';
   useTrackVisit('State of Mind');
   useTrackExternalClicks();
@@ -262,16 +190,63 @@ function StateOfMindContent() {
 
         {nowPlaying && (
           <div className="nav-player">
+            {/* Soundwave */}
+            <svg width="32" height="18" viewBox="0 0 32 18" className="nav-soundwave" xmlns="http://www.w3.org/2000/svg">
+              {[
+                { h: 4,  d: 0 },    { h: 10, d: 0.1 },  { h: 7,  d: 0.2 },
+                { h: 14, d: 0.05 }, { h: 9,  d: 0.3 },  { h: 16, d: 0.15 },
+                { h: 6,  d: 0.25 }, { h: 13, d: 0.08 }, { h: 8,  d: 0.35 },
+                { h: 15, d: 0.18 }, { h: 5,  d: 0.28 }, { h: 11, d: 0.12 },
+              ].map((bar, i) => (
+                <rect
+                  key={i}
+                  x={i * 2.5}
+                  y={(18 - bar.h) / 2}
+                  width="1.5"
+                  height={bar.h}
+                  rx="0.75"
+                  fill="rgba(255,255,255,0.5)"
+                  style={{
+                    transformOrigin: `${i * 2.5 + 0.75}px 9px`,
+                    animation: isPaused
+                      ? 'none'
+                      : `soundBar 0.9s ease-in-out ${bar.d}s infinite alternate`,
+                  }}
+                />
+              ))}
+            </svg>
+
+            {/* Info */}
             <div className="nav-player-info">
               <span className="nav-player-title">{nowPlaying.title}</span>
               <span className="nav-player-artist">{nowPlaying.artist}</span>
             </div>
-            <div className="nav-player-bars">
-              <span /><span /><span /><span />
+
+            {/* Timeline */}
+            <div className="nav-player-timeline">
+              <div className="nav-player-bar">
+                <div className="nav-player-fill" style={{ width: `${progress}%` }} />
+              </div>
             </div>
-            <button className="nav-player-stop" onClick={() => { setPlayingId(null); setNowPlaying(null); }} title="Stop">
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                <rect x="3" y="3" width="10" height="10" />
+
+            {/* Play/Pause */}
+            <button className="nav-player-btn" onClick={togglePause} title={isPaused ? 'Retomar' : 'Pausar'}>
+              {isPaused ? (
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M5 3l8 5-8 5V3z" />
+                </svg>
+              ) : (
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor">
+                  <rect x="4" y="3" width="3" height="10" />
+                  <rect x="9" y="3" width="3" height="10" />
+                </svg>
+              )}
+            </button>
+
+            {/* Stop */}
+            <button className="nav-player-btn nav-player-stop" onClick={stop} title="Fechar">
+              <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M3 3l10 10M13 3L3 13" />
               </svg>
             </button>
           </div>
