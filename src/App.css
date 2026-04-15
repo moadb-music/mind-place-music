@@ -3001,3 +3001,24 @@ body {
   color: #fff;
   font-weight: 700;
 }
+
+/* ── Botão de volta nas páginas dos projetos ────────────────────────────── */
+.back-btn-logo {
+  display: none;
+  height: 28px;
+  width: auto;
+}
+
+.back-btn-text {
+  display: inline;
+}
+
+@media (max-width: 768px) {
+  .back-btn-logo {
+    display: block;
+  }
+
+  .back-btn-text {
+    display: none;
+  }
+}

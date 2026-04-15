@@ -51,7 +51,8 @@ function StateOfMindContent() {
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
             <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          MIND PLACE MUSIC
+          <img src="/images/MPM Logo.png" alt="MPM" className="back-btn-logo" />
+          <span className="back-btn-text">MIND PLACE MUSIC</span>
         </Link>
 
         {nowPlaying && (
@@ -118,12 +119,14 @@ function StateOfMindContent() {
           </div>
         )}
 
-        <div className="nav-links">
-          <a href="#latest">LATEST</a>
-          <a href="#about">ABOUT</a>
-          <a href="#discography">DISCOGRAPHY</a>
+        <div className="nav-right">
+          <div className="nav-links">
+            <a href="#latest">LATEST</a>
+            <a href="#about">ABOUT</a>
+            <a href="#discography">DISCOGRAPHY</a>
+          </div>
+          <LangSwitcher />
         </div>
-        <LangSwitcher />
       </nav>
 
       {/* ── Hero / Latest Release ── */}
