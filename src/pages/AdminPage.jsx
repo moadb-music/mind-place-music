@@ -289,13 +289,23 @@ function ReleaseModal({ release, onSave, onClose, coversPath = 'som/covers' }) {
 
             <div className="admin-form-group">
               <label className="admin-label">Lançamento do release</label>
-              <input
-                className="admin-input"
-                type="date"
-                value={form.releaseDate || ''}
-                onChange={e => set('releaseDate', e.target.value)}
-                title="Preencha para lançar o release completo na seção Latest Releases"
-              />
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input
+                  className="admin-input"
+                  type="date"
+                  value={form.releaseDate || ''}
+                  onChange={e => set('releaseDate', e.target.value)}
+                  title="Preencha para lançar o release completo na seção Latest Releases"
+                />
+                <input
+                  className="admin-input"
+                  type="time"
+                  value={form.releaseTime || ''}
+                  onChange={e => set('releaseTime', e.target.value)}
+                  title="Hora do lançamento — usada para ordenar releases do mesmo dia"
+                  style={{ maxWidth: 110 }}
+                />
+              </div>
               <span style={{ fontSize: 11, color: '#555', marginTop: 2 }}>
                 Preencha ao finalizar o release — aparecerá como card único no Latest Releases
               </span>
@@ -345,7 +355,7 @@ function ReleaseModal({ release, onSave, onClose, coversPath = 'som/covers' }) {
                         placeholder="YouTube URL"
                       />
                     </div>
-                    {/* Linha 2: start, end, data, remover */}
+                    {/* Linha 2: start, end, data, hora, remover */}
                     <div className="admin-track-row-bottom">
                       <input
                         className="admin-input"
@@ -369,6 +379,14 @@ function ReleaseModal({ release, onSave, onClose, coversPath = 'som/covers' }) {
                         value={track.releaseDate || ''}
                         onChange={e => setTrack(idx, 'releaseDate', e.target.value)}
                         title="Data de lançamento"
+                      />
+                      <input
+                        className="admin-input"
+                        type="time"
+                        value={track.releaseTime || ''}
+                        onChange={e => setTrack(idx, 'releaseTime', e.target.value)}
+                        title="Hora do lançamento — usada para ordenar tracks do mesmo dia"
+                        style={{ maxWidth: 110 }}
                       />
                       {confirmRemove === idx ? (
                         <div className="admin-track-confirm">

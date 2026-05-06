@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSomReleases } from '../hooks/useSomReleases';
 import { useJiveMindReleases } from '../hooks/useJiveMindReleases';
 import { useSpotifyReleases } from '../hooks/useSpotifyReleases';
@@ -36,6 +36,7 @@ function extractItems(releases, artist, project) {
         id: `${project}-release-${release.id}`,
         trackId: `lr-${project}-release-${release.id}`,
         releaseDate: release.releaseDate,
+        releaseTime: release.releaseTime || '00:00',
         title: release.title,
         typeLabel: release.type,
         coverUrl: release.coverUrl,
@@ -53,6 +54,7 @@ function extractItems(releases, artist, project) {
         id: `${project}-track-${release.id}-${idx}`,
         trackId: `lr-${project}-track-${release.id}-${idx}`,
         releaseDate: track.releaseDate,
+        releaseTime: track.releaseTime || release.releaseTime || '00:00',
         trackIndex: idx,
         title: track.title || track.name || '',
         typeLabel: 'TRACK',
@@ -262,18 +264,24 @@ export default function LatestReleasesSection() {
     if (!playingId) setActiveId(null);
   }, [playingId]);
 
-  const allItems = [
+  const allItems = useMemo(() => [
     ...extractItems(moadbReleases, 'Mind of a Dead Body', 'moadb'),
     ...extractItems(somReleases, 'State of Mind', 'som'),
     ...extractItems(jmReleases, 'Jive Mind', 'jm'),
-  ];
+  ], [moadbReleases, somReleases, jmReleases]);
 
-  const sorted = [...allItems].sort((a, b) => {
-    if (b.releaseDate > a.releaseDate) return 1;
-    if (b.releaseDate < a.releaseDate) return -1;
-    // mesma data — ordena por trackIndex (número maior = mais recente = primeiro)
-    return (b.trackIndex ?? -1) - (a.trackIndex ?? -1);
-  });
+
+  const sorted = useMemo(() => {
+    if (loading) return [];
+    return [...allItems].sort((a, b) => {
+      // Combina data + hora para comparação precisa: "2026-05-04T10:00"
+      const dtA = `${a.releaseDate}T${a.releaseTime}`;
+      const dtB = `${b.releaseDate}T${b.releaseTime}`;
+      if (dtB > dtA) return 1;
+      if (dtB < dtA) return -1;
+      return 0;
+    });
+  }, [allItems, loading]);
 
   const latest = sorted.slice(0, 8);
 
